@@ -186,8 +186,7 @@ class Axi {
             const tween = item.tweens[0]
             const eased = tween.easing(progressT / 1000)
             const newVal = (tween.to - tween.from) * eased + tween.from
-            console.log(newVal, '新值')
-            setProgressValue['css'](item.target, item.prop, newVal)
+            setProgressValue['css'](item.target, item.prop, newVal + 'px')
         })
         if (progressT < 1000) requestAnimationFrame(this.animationStep.bind(this))
     }

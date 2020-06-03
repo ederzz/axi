@@ -2,13 +2,17 @@
   "name": "axi",
   "version": "1.0.0",
   "description": "Animation engine.",
-  "main": "index.js",
+  "main": "lib/axi.umd.js",
+  "module": "lib/axi.es.js",
+  "unpkg": "dist/axi.umd.js",
   "directories": {
     "example": "example",
     "lib": "lib"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx rollup -c",
+    "watch": "npx rollup -cw"
   },
   "repository": {
     "type": "git",
@@ -19,5 +23,9 @@
   "bugs": {
     "url": "https://github.com/shenyiling/axi/issues"
   },
-  "homepage": "https://github.com/shenyiling/axi#readme"
+  "homepage": "https://github.com/shenyiling/axi#readme",
+  "devDependencies": {
+    "rollup-plugin-typescript2": "^0.27.1",
+    "typescript": "^3.9.3"
+  }
 }
