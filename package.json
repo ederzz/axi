@@ -1,0 +1,23 @@
+{
+  "name": "axi",
+  "version": "1.0.0",
+  "description": "Animation engine.",
+  "main": "index.js",
+  "directories": {
+    "example": "example",
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shenyiling/axi.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/shenyiling/axi/issues"
+  },
+  "homepage": "https://github.com/shenyiling/axi#readme"
+}

@@ -7,7 +7,7 @@ interface IEases {
 // TODO: elastic, bounce ease function
 const overshoot = 1.70158
 // t: [0, 1] 
-export const easeIns: IEases = {
+const easeIns: IEases = {
     back: t => t * t * ((overshoot + 1) * t - overshoot), // https://en.wikipedia.org/wiki/Twelve_basic_principles_of_animation#Anticipation
     sin: t => Math.sin(t * Math.PI / 2), // 正弦曲线缓动
     circle: t => Math.sqrt(1 - t * t), // 圆形曲线缓动
@@ -24,10 +24,18 @@ export const easeIns: IEases = {
     expo: t => 2 ** (10 * ( t - 1 )) // 指数缓动
 }
 
-export const easeOuts: IEases = {}
-export const easeInOuts: IEases = {}
+const easeOuts: IEases = {}
+const easeInOuts: IEases = {}
 
 for (const ease in easeIns) {
     easeOuts[ ease ] = t => 1 - easeIns[ease](1 - t) // easeout = 1 - easein(1 - t)
     easeInOuts[ ease ] = t => t < 0.5 ? easeIns[ ease ](t * 2) / 2 : 1 - easeIns[ ease ](2 - 2 * t) / 2
 }
+
+const easings = {
+    ...easeIns,
+    ...easeOuts,
+    ...easeInOuts
+}
+
+export default easings
