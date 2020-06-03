@@ -3,26 +3,23 @@ import easings from './ease'
 interface AnimationOpts {
     delay: number,
     endDelay: number,
-}
-
-interface TweenOpts {
+    duration: number,
     easing: string,
-    duration: number, // 持续时间
+    autoPlay: boolean
 }
 
-type Options = TweenOpts & AnimationOpts &{
-    target: string | HTMLElement | (string | HTMLElement)[], 
-    autoPlay: boolean,
-    [animationKey: string]: any // 动画属性
+type ITarget = string | HTMLElement | (string | HTMLElement)[]
+
+type Options = AnimationOpts &{
+    target: ITarget, 
+    [animationKey: string]: any 
 }
 
 type animationType = 'css' | 'attribute' | 'transform' | 'object'
 
 interface ITween { 
-    value: any,
-    from: number,
+    from: number, // TODO:
     to: number,
-    easing: (t: number) => number
 }
 
 interface IAnimation {
@@ -31,22 +28,21 @@ interface IAnimation {
     delay: number, 
     endDelay: number,
     prop: string, 
+    easing: (t: number) => number,
     tweens: ITween[]
 }
 
 const defaultAnimationOpts = {
     delay: 0,
     endDelay: 0,
-}
-
-const defaultTweenOpts = {
     easing: 'sin',
     duration: 1000,
+    autoPlay: true
 }
 
 // 是否为动画属性
 function isAnimationKey(k: string): boolean {
-    return k !== 'target' && !defaultTweenOpts.hasOwnProperty(k) && !defaultAnimationOpts.hasOwnProperty(k) && k !== 'target' && k !== 'autoPlay'
+    return k !== 'target' && !defaultAnimationOpts.hasOwnProperty(k) 
 }
 
 function updateObjectProps(o1: any, o2: any) {
@@ -58,7 +54,7 @@ function updateObjectProps(o1: any, o2: any) {
     return cloneObj
 }
 
-var setProgressValue = { 
+const setProgressValue = { 
     css: (t: any, p: string, v: any) => { t.style[p] = v },
     attribute: (t: HTMLElement, p: string, v: any) => { t.setAttribute(p, v) },
     object: (t: any, p: any, v: any) => { t[p] = v; },
@@ -94,7 +90,7 @@ function getCssValue(ele: HTMLElement, prop: string) {
 // TODO: 所有可以更新的属性
 // TODO: 要执行的所有动画
 // TODO: getHooks
-// TODO: 处理查找元素 getAnimationEles
+// TODO: 处理查找元素 setAnimationEles
 // TODO: 命名
 // TODO: 工具函数抽离
 // TODO: 设置动画阶段值
@@ -104,16 +100,19 @@ function getCssValue(ele: HTMLElement, prop: string) {
 // TODO: requestAnimationFrame中访问不到 this
 // TODO: autoplay默认参数
 // normalizeTweens TODO: 结束 开始值 from的值为元素本来值，或者上一个tween的结果
+// TODO: 多个tween，怎么定义
+// 假设分为多个值，就有多个缓动，每个缓动均分duration，设置启动和结束时间
+// TODO: 颜色值特殊处理
+// TODO: easing指定多个值 delay endDelay处理
 
 
 class Axi {
     private options: Options
 
     private animationOpts: AnimationOpts
-    private tweenOpts: TweenOpts
-    private hooks: Function[] // 钩子函数
+    private hooks: Function[] // func of hooks
 
-    private targets: HTMLElement[] // animation targets
+    private targets: HTMLElement[] // targets of animation
     private animationKeys: string[]
     private animations: IAnimation[]
 
@@ -121,14 +120,15 @@ class Axi {
 
     constructor(opts: Options) {
         this.options = opts
-        this.getAnimationEles()
-        this.formatOpts(opts) // 动画参数
-        this.getAnimationKeys(opts)
+        this.setAnimationOpts(opts) 
+        this.setAnimationEles()
+        this.setAnimationKeys(opts)
         this.createAnimations()
+
         if (opts.autoPlay) this.execute()
     }
 
-    private getAnimationKeys(opts: Options) {
+    private setAnimationKeys(opts: Options) {
         const keys: string[] = []
         for (const k in opts) {
             if (isAnimationKey(k)) keys.push(k)
@@ -140,7 +140,7 @@ class Axi {
         return 'css'
     }
 
-    private getAnimationEles() { // 获取更新元素
+    private setAnimationEles() { // 获取更新元素
         let { target } = this.options
         target = Array.isArray(target) ? target : [ target ]
         this.targets = [].concat(
@@ -151,9 +151,8 @@ class Axi {
         )
     }
 
-    private formatOpts(opts: Options) {
+    private setAnimationOpts(opts: Options) { // set animation options
         this.animationOpts = updateObjectProps(defaultAnimationOpts, opts)
-        this.tweenOpts = updateObjectProps(defaultTweenOpts, opts)
     }
 
     private createAnimations() {
@@ -162,12 +161,14 @@ class Axi {
                 return this.animationKeys.map(prop => ({
                     target,
                     prop,
-                    ...this.animationOpts,
-                    tweens: [{
-                        value: this.options[prop],
+                    type: 'css',
+                    dealy: this.animationOpts.delay,
+                    endDelay: this.animationOpts.endDelay,
+                    easing: parseEasing(this.animationOpts.easing),
+                    tweens: [{ // TODO: 多个tween和from to 的属性，value的作用
                         to: this.options[prop],
                         from: getCssValue(target, prop),
-                        easing: parseEasing(this.tweenOpts.easing)
+                        
                     }]
                 }))
             })
@@ -179,12 +180,12 @@ class Axi {
         requestAnimationFrame(this.animationStep.bind(this))
     }
 
-    private animationStep(t: number) {
+    private animationStep(t: number) { // TODO: 什么时候结束，暂停等控制
         if (this.startTime === void 0) this.startTime = t
         const progressT = t - this.startTime
         this.animations.forEach(item => {
             const tween = item.tweens[0]
-            const eased = tween.easing(progressT / 1000)
+            const eased = item.easing(progressT / 1000)
             const newVal = (tween.to - tween.from) * eased + tween.from
             setProgressValue['css'](item.target, item.prop, newVal + 'px')
         })

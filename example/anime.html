@@ -9,6 +9,7 @@
             width: 50px;
             height: 50px;
             background-color: green;
+            position: relative;
         }
     </style>
 </head>
@@ -21,8 +22,10 @@
 
         anime({
             targets: '.a',
-            width: '100px',
-            rotate: 540 // -> '540deg'
+            left: '240px',
+            // backgroundColor: '#FFF',
+            borderRadius: ['0%', '50%', '20%'], 
+            easing: 'easeInOutQuad'
         });
     </script>
 </body>
