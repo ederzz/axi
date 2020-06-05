@@ -714,7 +714,7 @@ function getProperties(tweenSettings, params) {
 function normalizeTweenValues(tween, animatable) {
   var t = {};
   for (var p in tween) {
-    var value = getFunctionValue(tween[p], animatable);
+    var value = getFunctionValue(tween[p], animatable); // 缓动值
     if (is.arr(value)) {
       value = value.map(function (v) { return getFunctionValue(v, animatable); });
       if (value.length === 1) { value = value[0]; }
@@ -731,7 +731,7 @@ function normalizeTweens(prop, animatable) {
   return prop.tweens.map(function (t) {
     var tween = normalizeTweenValues(t, animatable);
     var tweenValue = tween.value;
-    var to = is.arr(tweenValue) ? tweenValue[1] : tweenValue;
+    var to = is.arr(tweenValue) ? tweenValue[1] : tweenValue; // [ '200px', '400px' ]
     var toUnit = getUnit(to);
     var originalValue = getOriginalTargetValue(animatable.target, prop.name, toUnit, animatable);
     var previousValue = previousTween ? previousTween.to.original : originalValue;
