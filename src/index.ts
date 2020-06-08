@@ -92,7 +92,9 @@ function decomposeValue(val: Ivalue | number, unit: string) {
 // TODO: 颜色值特殊处理
 // TODO: 解析单位和数字
 // TODO: endDelay的作用
-
+// TODO: 缓动函数调整
+// TODO: 多段式动画
+// TODO: 对比测试
 
 class Axi {
     private options: Options

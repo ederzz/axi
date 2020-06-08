@@ -19,7 +19,7 @@
         }
         .c {
             background-color: rgb(45, 230, 236);
-            top: 50px;
+            top: 100px;
         }
     </style>
 </head>
@@ -35,13 +35,13 @@
             autoPlay: true,
             target: '.a',
             left: 500,
-            easing: 'expo'
+            easing: 'easeInExpo'
         })
         new Axi({
             autoPlay: true,
             target: '.b',
             left: 500,
-            easing: 'quint'
+            easing: 'easeOutElastic'
         })
         new Axi({
             autoPlay: true,
@@ -49,7 +49,7 @@
             translateX: '500px',
             scale: 2,
             rotate: '1turn',
-            easing: 'quint'
+            easing: 'easeOutElastic'
         })
     </script>
 </body>
