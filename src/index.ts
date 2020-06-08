@@ -1,5 +1,5 @@
 import easings from './ease'
-import { parseUnit, getCssValue } from './utils'
+import { parseUnit, getCssValue, updateObjectProps, minMax } from './utils'
 
 interface AnimationOpts {
     delay: number,
@@ -10,17 +10,27 @@ interface AnimationOpts {
 }
 
 type ITarget = string | HTMLElement | (string | HTMLElement)[]
-
 type Options = AnimationOpts &{
     target: ITarget, 
     [animationKey: string]: any 
 }
-
 type animationType = 'css' | 'attribute' | 'transform' | 'object'
+type Ivalue = number | number[] | string | string[]
+
+interface TweenValue {
+    number: number,
+    unit: string,
+    value: number | string
+}
 
 interface ITween { 
-    from: number, // TODO:
-    to: number,
+    start: number,
+    end: number,
+    delay: number,
+    duration: number,
+    value: number | string,
+    from: TweenValue,
+    to: TweenValue,
 }
 
 interface IAnimation {
@@ -46,15 +56,6 @@ function isAnimationKey(k: string): boolean {
     return k !== 'target' && !defaultAnimationOpts.hasOwnProperty(k) 
 }
 
-function updateObjectProps(o1: any, o2: any) {
-    const cloneObj = { ...o1 }
-    for (const k in o1) {
-        cloneObj[ k ] = o2.hasOwnProperty(k) ? o2[k] : o1[k]
-    }
-
-    return cloneObj
-}
-
 const setProgressValue = { 
     css: (t: any, p: string, v: any) => { t.style[p] = v },
     attribute: (t: HTMLElement, p: string, v: any) => { t.setAttribute(p, v) },
@@ -73,7 +74,16 @@ function parseEasing(n: string) {
     return easings[n || 'sin']
 }
 
+function decomposeValue(val: Ivalue | number, unit: string) {
+    var reg = /[+-]?\d*\.?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g
+    const matchRet = (val + '').match(reg)
 
+    return {
+        original: val,
+        number: matchRet ? +matchRet[0] : 0,
+        unit
+    }
+}
 
 // TODO: 整理要变更的属性数组，每一个元素都包含属性名，和一个缓动数组。
 // TODO: 获取所有的目标元素，整理为一个对象,{ target: html元素， transforms: 已有的属性 }
@@ -93,10 +103,10 @@ function parseEasing(n: string) {
 // TODO: 添加注释和ts类型
 // TODO: requestAnimationFrame中访问不到 this
 // TODO: autoplay默认参数
-// normalizeTweens TODO: 结束 开始值 from的值为元素本来值，或者上一个tween的结果
 // TODO: 多个tween，怎么定义
 // TODO: 颜色值特殊处理
 // TODO: 解析单位和数字
+// TODO: endDelay的作用
 
 
 class Axi {
@@ -110,6 +120,7 @@ class Axi {
     private animations: IAnimation[]
 
     private startTime: number
+    private paused: boolean
 
     constructor(opts: Options) {
         this.options = opts
@@ -174,31 +185,33 @@ class Axi {
         this.animations = animations
     }
 
-    private parseTweens(target: HTMLElement, prop: string, value: string | string[]/* value of tweens */) {
+    private parseTweens(target: HTMLElement, prop: string, value: Ivalue/* value of tweens */) {
         const {
             delay,
             endDelay,
             duration,
         } = this.animationOpts
         const oriValue = this.getTargetOriValue(target, prop)
-        if ((Array as any).isArray(value) === 'string') {
-            return [{ // TODO: from to
-                start: delay,
-                end: delay + endDelay + duration,
-                from: oriValue,
-                to: value,
-                value
-            }]
-        }
-        const len = value.length
+        const oriUnit = parseUnit(oriValue)
+        const vals = Array.isArray(value) ? (value as string[] | number[]) : [ value ]
+        const len = vals.length
         const durationPiece = duration / len
-        return (value as string[]).map((d: string, i: number) => ({
-            start: (i === 0 ? delay : 0) + durationPiece * i,
-            end: delay + durationPiece * (i + 1) + (i === len - 1 ? endDelay : 0),
-            value: d,
-            from: i === 0 ? oriValue : value[ i - 1 ],
-            to: value[i]
-        }))
+
+        return (vals as string[]).map((d: string, i: number) => {
+            const fromVal = i === 0 ? oriValue : vals[ i - 1 ]
+            const from = decomposeValue(fromVal, parseUnit(fromVal) || oriUnit)
+            const toVal = vals[i]
+            const to = decomposeValue(toVal, parseUnit(toVal) || oriUnit)
+            return {
+                start: (i === 0 ? delay : 0) + durationPiece * i,
+                end: delay + durationPiece * (i + 1) + (i === len - 1 ? endDelay : 0),
+                duration: durationPiece,
+                value: d,
+                delay,
+                from,
+                to
+            }
+        })
     }
 
     // get original value of target property.
@@ -211,21 +224,28 @@ class Axi {
         requestAnimationFrame(this.animationStep.bind(this))
     }
 
-    private animationStep(t: number) { // TODO: 什么时候结束，暂停等控制
+    private animationStep(t: number) {
         if (this.startTime === void 0) this.startTime = t
         const progressT = t - this.startTime
         this.animations.forEach(item => {
-            const tween = item.tweens[0]
-            const eased = item.easing(progressT / 1000)
-            const newVal = (tween.to - tween.from) * eased + tween.from
-            setProgressValue['css'](item.target, item.prop, newVal + 'px')
+            const tween = item.tweens.filter(d => progressT < d.end)[0]
+            if (!tween) return
+            const eased = item.easing(minMax(progressT - tween.start - tween.delay, 0, tween.duration) / tween.duration)
+            const newVal = (tween.to.number - tween.from.number) * eased + tween.from.number
+            setProgressValue['css'](item.target, item.prop, newVal + tween.to.unit)
         })
-        if (progressT < 1000) requestAnimationFrame(this.animationStep.bind(this))
+        this.checkEnding(progressT)
+        if (!this.paused) requestAnimationFrame(this.animationStep.bind(this))
     }
 
-    // 多个tween 取未结束的tween第一个，减去开始时间和delay后开始，除以/duration
-    // var elapsed = minMax(insTime - tween.start - tween.delay, 0, tween.duration) / tween.duration;
-    // delay是不算在duration中的
+    private checkEnding(t: number) {
+        const {
+            delay,
+            endDelay,
+            duration
+        } = this.animationOpts
+        if (t >= delay + endDelay + duration) this.paused = true
+    }
 }
 
 export default Axi

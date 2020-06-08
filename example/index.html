@@ -5,16 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
-        .a {
+        .a,
+        .b {
             width: 50px;
             height: 50px;
             background-color: green;
+            position: relative;
+        }
+        .b {
+            background-color: red;
+            top: 50px;
         }
     </style>
 </head>
 <body>
     <div class="a"></div>
-    <div class="a"></div>
+    <div class="b"></div>
 
     <script type="module">
         import Axi from '../lib/axi.es.js'
@@ -22,8 +28,14 @@
         new Axi({
             autoPlay: true,
             target: '.a',
-            width: 400,
+            left: 500,
             easing: 'expo'
+        })
+        new Axi({
+            autoPlay: true,
+            target: '.b',
+            left: 500,
+            easing: 'quint'
         })
     </script>
 </body>
