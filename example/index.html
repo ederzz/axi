@@ -6,14 +6,19 @@
     <title>Document</title>
     <style>
         .a,
-        .b {
+        .b,
+        .c {
             width: 50px;
             height: 50px;
-            background-color: green;
+            background-color: rgb(46, 236, 46);
             position: relative;
         }
         .b {
-            background-color: red;
+            background-color: rgb(228, 66, 66);
+            top: 50px;
+        }
+        .c {
+            background-color: rgb(45, 230, 236);
             top: 50px;
         }
     </style>
@@ -21,6 +26,7 @@
 <body>
     <div class="a"></div>
     <div class="b"></div>
+    <div class="c"></div>
 
     <script type="module">
         import Axi from '../lib/axi.es.js'
@@ -35,6 +41,14 @@
             autoPlay: true,
             target: '.b',
             left: 500,
+            easing: 'quint'
+        })
+        new Axi({
+            autoPlay: true,
+            target: '.c',
+            translateX: '500px',
+            scale: 2,
+            rotate: '1turn',
             easing: 'quint'
         })
     </script>

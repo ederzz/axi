@@ -1,5 +1,13 @@
 import easings from './ease'
-import { parseUnit, getCssValue, updateObjectProps, minMax } from './utils'
+import { 
+    parseUnit, 
+    updateObjectProps, 
+    minMax, 
+    getAnimationType,
+    setProgressValue,
+    getTargetOriValue,
+    getTransforms
+} from './utils'
 
 interface AnimationOpts {
     delay: number,
@@ -35,10 +43,11 @@ interface ITween {
 
 interface IAnimation {
     target: HTMLElement[],
-    type: string,
+    type: animationType,
     delay: number, 
     endDelay: number,
     prop: string, 
+    transformCache: { [k: string]: any },
     easing: (t: number) => number,
     tweens: ITween[]
 }
@@ -56,20 +65,6 @@ function isAnimationKey(k: string): boolean {
     return k !== 'target' && !defaultAnimationOpts.hasOwnProperty(k) 
 }
 
-const setProgressValue = { 
-    css: (t: any, p: string, v: any) => { t.style[p] = v },
-    attribute: (t: HTMLElement, p: string, v: any) => { t.setAttribute(p, v) },
-    object: (t: any, p: any, v: any) => { t[p] = v; },
-    transform: (t: any, p: any, v: any, transforms: any, manual: any) => {
-    //   transforms.list.set(p, v)
-    //   if (p === transforms.last || manual) {
-    //     var str = '';
-    //     transforms.list.forEach(function (value, prop) { str += prop + "(" + value + ") "; });
-    //     t.style.transform = str;
-    //   }
-    }
-}
-
 function parseEasing(n: string) {
     return easings[n || 'sin']
 }
@@ -85,25 +80,15 @@ function decomposeValue(val: Ivalue | number, unit: string) {
     }
 }
 
-// TODO: 整理要变更的属性数组，每一个元素都包含属性名，和一个缓动数组。
-// TODO: 获取所有的目标元素，整理为一个对象,{ target: html元素， transforms: 已有的属性 }
-// TODO: 分析有几个缓动，然后每个元素都应该执行这些缓动
-// TODO: 最后生成要执行的动画对象，
-// TODO: 最后创建出一个实例
 // TODO: 所有的缓动参数
 // TODO: 所有可以更新的属性
 // TODO: 要执行的所有动画
 // TODO: getHooks
 // TODO: 处理查找元素 setAnimationEles
 // TODO: 命名
-// TODO: 工具函数抽离
-// TODO: 设置动画阶段值
 // TODO: 整理tween的属性
 // TODO: 整理其他的参数 keyframes svg ...
 // TODO: 添加注释和ts类型
-// TODO: requestAnimationFrame中访问不到 this
-// TODO: autoplay默认参数
-// TODO: 多个tween，怎么定义
 // TODO: 颜色值特殊处理
 // TODO: 解析单位和数字
 // TODO: endDelay的作用
@@ -140,10 +125,6 @@ class Axi {
         this.animationKeys = keys
     }
 
-    private getAnimationType(): animationType {
-        return 'css'
-    }
-
     private setAnimationEles() { // 获取更新元素
         let { target } = this.options
         target = Array.isArray(target) ? target : [ target ]
@@ -162,13 +143,15 @@ class Axi {
     private createAnimations() {
         const animations: IAnimation[] = [].concat(
             ...this.targets.map(target => {
+                const transformCache = getTransforms(target)
                 return this.animationKeys.map(prop => {
                     const {
                         delay,
                         endDelay,
                         easing
                     } = this.animationOpts
-                    const tweens = this.parseTweens( target, prop, this.options[ prop ] )
+                    const type = getAnimationType(target, prop)
+                    const tweens = this.parseTweens( target, type, prop, this.options[ prop ] )
                     
                     return {
                         target,
@@ -176,8 +159,9 @@ class Axi {
                         tweens,
                         delay,
                         endDelay,
+                        type,
+                        transformCache,
                         easing: parseEasing(easing),
-                        type: 'css',
                     }
                 })
             })
@@ -185,13 +169,13 @@ class Axi {
         this.animations = animations
     }
 
-    private parseTweens(target: HTMLElement, prop: string, value: Ivalue/* value of tweens */) {
+    private parseTweens(target: HTMLElement, type: string, prop: string, value: Ivalue/* value of tweens */) {
         const {
             delay,
             endDelay,
             duration,
         } = this.animationOpts
-        const oriValue = this.getTargetOriValue(target, prop)
+        const oriValue = getTargetOriValue(type, target, prop)
         const oriUnit = parseUnit(oriValue)
         const vals = Array.isArray(value) ? (value as string[] | number[]) : [ value ]
         const len = vals.length
@@ -214,12 +198,6 @@ class Axi {
         })
     }
 
-    // get original value of target property.
-    private getTargetOriValue(ele: HTMLElement, prop: string) {
-        // TODO: 根据不同类型获取不同的原始值
-        return getCssValue(ele, prop)
-    }
-
     public execute() { // 执行动画
         requestAnimationFrame(this.animationStep.bind(this))
     }
@@ -232,7 +210,7 @@ class Axi {
             if (!tween) return
             const eased = item.easing(minMax(progressT - tween.start - tween.delay, 0, tween.duration) / tween.duration)
             const newVal = (tween.to.number - tween.from.number) * eased + tween.from.number
-            setProgressValue['css'](item.target, item.prop, newVal + tween.to.unit)
+            setProgressValue[item.type](item.target, item.prop, tween.to.unit ? newVal + tween.to.unit : newVal, item.type === 'transform' ? item.transformCache : null)
         })
         this.checkEnding(progressT)
         if (!this.paused) requestAnimationFrame(this.animationStep.bind(this))
