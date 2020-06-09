@@ -104,6 +104,7 @@ function decomposeValue(val: Ivalue | number, unit: string) {
 // TODO: transform 处理不到位
 // TODO: 测试object
 // TODO: 多段支持
+// TODO: seek reverse
 
 class Axi {
     private options: Options
@@ -116,7 +117,11 @@ class Axi {
     private animations: IAnimation[]
 
     private startTime: number
-    private paused: boolean
+    private curTime: number = 0
+    private lastTime: number = 0
+    public paused: boolean = true
+
+    private rafId: number
 
     constructor(opts: Options) {
         this.options = opts
@@ -125,7 +130,10 @@ class Axi {
         this.setAnimationKeys(opts)
         this.createAnimations()
 
-        if (this.animationOpts.autoPlay) this.execute()
+        if (this.animationOpts.autoPlay) {
+            this.paused = false
+            this.execute()
+        }
     }
 
     private setAnimationKeys(opts: Options) {
@@ -209,13 +217,15 @@ class Axi {
         })
     }
 
-    public execute() { // 执行动画
-        requestAnimationFrame(this.animationStep.bind(this))
+    private execute() { // 执行动画
+        this.rafId = requestAnimationFrame(this.animationStep.bind(this))
     }
 
     private animationStep(t: number) {
-        if (this.startTime === void 0) this.startTime = t
-        const progressT = t - this.startTime
+        console.log('step')
+        if (!this.startTime) this.startTime = t
+        const progressT = t - this.startTime + this.lastTime
+        this.curTime = progressT // record current progress time
         this.animations.forEach(item => {
             const tween = item.tweens.filter(d => progressT < d.end)[0]
             if (!tween) return
@@ -224,7 +234,7 @@ class Axi {
             setProgressValue[item.type](item.target, item.prop, tween.to.unit ? newVal + tween.to.unit : newVal, item.type === 'transform' ? item.transformCache : null)
         })
         this.checkEnding(progressT)
-        if (!this.paused) requestAnimationFrame(this.animationStep.bind(this))
+        if (!this.paused) this.execute()
     }
 
     private checkEnding(t: number) {
@@ -234,6 +244,32 @@ class Axi {
             duration
         } = this.animationOpts
         if (t >= delay + endDelay + duration) this.paused = true
+    }
+
+    // control
+    public pause() {
+        if (this.paused) return
+        cancelAnimationFrame(this.rafId)
+        this.paused = true
+        this.startTime = 0
+        this.lastTime = this.curTime
+    }
+
+    public play() {
+        console.log('开始')
+        if (!this.paused) return
+        this.paused = false
+        this.execute()
+    }
+
+    public restart() {
+        this.paused = false
+        this.startTime = 0
+        this.curTime = 0
+        this.execute()
+    }
+
+    public seek(t: number) {
     }
 }
 

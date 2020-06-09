@@ -27,22 +27,43 @@
     <div class="a"></div>
     <div class="b"></div>
     <div class="c"></div>
+    <div class="actions">
+        <button class="start">开始</button>
+        <button class="pause">暂停</button>
+        <button class="restart">重启</button>
+        <input class="range" type="range" />
+    </div>
 
     <script type="module">
         import Axi from '../lib/axi.es.js'
-
-        new Axi({
-            autoPlay: true,
+        import anime from './anime.es.js'
+        const a = new Axi({
             target: '.a',
             left: 500,
-            // easing: 'easeInExpo'
+            duration: 6000,
+            autoPlay: false
         })
-        new Axi({
-            autoPlay: true,
-            target: '.b',
+
+        anime({
+            targets: '.b',
             left: 500,
-            easing: 'easeInBack'
+            duration: 3000
         })
+
+        document.querySelector('.start').addEventListener('click', () => {
+            a.play()
+        })
+        document.querySelector('.pause').addEventListener('click', () => {
+            a.pause()
+        })
+        document.querySelector('.restart').addEventListener('click', () => {
+            a.restart()
+        })
+        document.querySelector('.range').addEventListener('input', (e) => {
+            console.log(e.target.value / 100)
+            a.seek(e.target.value / 100 * 6000)
+        })
+
         // new Axi({
         //     autoPlay: true,
         //     target: '.c',
