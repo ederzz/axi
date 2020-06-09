@@ -55,7 +55,7 @@ interface IAnimation {
 const defaultAnimationOpts = {
     delay: 0,
     endDelay: 0,
-    easing: 'sin',
+    easing: 'easeOutElastic(1, .5)',
     duration: 1000,
     autoPlay: true
 }
@@ -66,7 +66,12 @@ function isAnimationKey(k: string): boolean {
 }
 
 function parseEasing(n: string) {
-    return easings[n || 'sin']
+    const easingName = n.split('(')[0]
+    const ease = easings[ easingName ]
+    const match = /\(([^)]+)\)/.exec(n)
+    const params = match ? match[1].split(',').map(parseFloat) : [];
+
+    return ease.apply(null, params)
 }
 
 function decomposeValue(val: Ivalue | number, unit: string) {
@@ -95,6 +100,10 @@ function decomposeValue(val: Ivalue | number, unit: string) {
 // TODO: 缓动函数调整
 // TODO: 多段式动画
 // TODO: 对比测试
+// TODO: 性能测试
+// TODO: transform 处理不到位
+// TODO: 测试object
+// TODO: 多段支持
 
 class Axi {
     private options: Options
@@ -116,7 +125,7 @@ class Axi {
         this.setAnimationKeys(opts)
         this.createAnimations()
 
-        if (opts.autoPlay) this.execute()
+        if (this.animationOpts.autoPlay) this.execute()
     }
 
     private setAnimationKeys(opts: Options) {
