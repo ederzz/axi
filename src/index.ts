@@ -28,7 +28,7 @@ type DelayFunc = (el: any, idx: number, len: number) => number
 type IDelay = number | DelayFunc
 type ITarget = string | HTMLElement | (string | HTMLElement)[]
 type animationType = 'css' | 'attribute' | 'transform' | 'object'
-type Ivalue = number | number[] | string | string[]
+type Ivalue = number | number[] | string | string[] 
 type IDirection = 'alternate' | 'reverse' | 'normal'
 
 interface TweenValue {
@@ -169,11 +169,6 @@ class Axi {
 
     private setAnimationOpts(opts: Options) { // set animation options
         this.animationOpts = updateObjectProps(defaultAnimationOpts, opts)
-        const {
-            delay,
-            endDelay,
-            duration
-        } = this.animationOpts
         this.reversed = this.animationOpts.direction === 'reverse'
     }
 
@@ -191,17 +186,27 @@ class Axi {
 
                 return this.animationKeys.map(prop => {
                     const type = getAnimationType(target, prop)
-                    const tweens = this.parseTweens( target, type, prop, this.options[ prop ], curDelay, curEndDelay )
+                    let opts = { // options of every animation.
+                        prop,
+                        easing,
+                        delay: curDelay,
+                        endDelay: curEndDelay,
+                        duration: this.animationOpts.duration,
+                        value: this.options[ prop ] /* value of tweens */
+                    }
+                    const propValue = this.options[ prop ]
+                    if (typeof propValue === 'object') {
+                        opts = updateObjectProps(opts, propValue)
+                    }
+                    opts.easing = parseEasing(opts.easing)
+                    const tweens = this.parseTweens( target, type, opts )
                     
                     return {
                         target,
-                        prop,
                         tweens,
                         type,
                         transformCache,
-                        delay: curDelay,
-                        endDelay: curEndDelay,
-                        easing: parseEasing(easing),
+                        ...opts
                     }
                 })
             })
@@ -209,10 +214,14 @@ class Axi {
         this.animations = animations
     }
 
-    private parseTweens(target: HTMLElement, type: string, prop: string, value: Ivalue/* value of tweens */, delay: number, endDelay: number) {
+    private parseTweens(target: HTMLElement, type: string, opts: { value: Ivalue, prop: string, delay: number, endDelay: number, easing: string, duration: number }) {
         const {
-            duration,
-        } = this.animationOpts
+            prop,
+            delay,
+            endDelay,
+            value,
+            duration
+        } = opts
         const oriValue = getTargetOriValue(type, target, prop)
         const oriUnit = parseUnit(oriValue)
         const vals = Array.isArray(value) ? (value as string[] | number[]) : [ value ]

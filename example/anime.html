@@ -15,19 +15,28 @@
 </head>
 <body>
     <div class="a"></div>
-    <div class="a"></div>
 
     <script type="module">
         import anime from './anime.es.js'
 
         anime({
             targets: '.a',
-            // left: '240px',
-            backgroundColor: '#FF0',
-            // translateX: 270,
-            delay: 100,
-            endDelay: 100,
-            easing: 'easeOutElastic(5, .1)'
+            translateX: {
+                value: 250,
+                duration: 800
+            },
+            rotate: {
+                value: 360,
+                duration: 1800,
+                easing: 'easeInOutSine'
+            },
+            scale: {
+                value: 2,
+                duration: 1600,
+                delay: 800,
+                easing: 'easeInOutQuart'
+            },
+            delay: 250
         });
     </script>
 </body>

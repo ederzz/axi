@@ -25,8 +25,8 @@
 </head>
 <body>
     <div class="a"></div>
-    <div class="a"></div>
-    <div class="a"></div>
+    <!-- <div class="a"></div>
+    <div class="a"></div> -->
     <div class="b"></div>
     <div class="b"></div>
     <div class="c"></div>
@@ -42,10 +42,22 @@
         import anime from './anime.es.js'
         const a = new Axi({
             target: '.a',
-            left: 500,
-            duration: 3000,
-            // autoPlay: false,
-            delay(_, i) { return i * 1000 + 2000 },
+            translateX: {
+                value: 250,
+                duration: 800
+            },
+            rotate: {
+                value: 360,
+                duration: 1800,
+                easing: 'easeInOutSine'
+            },
+            // scale: {
+            //     value: 2,
+            //     duration: 1600,
+            //     delay: 800,
+            //     easing: 'easeInOutQuart'
+            // },
+            delay: 250
             // easing: 'linear'
         })
         console.log(a.duration)
