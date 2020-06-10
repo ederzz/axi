@@ -14,16 +14,20 @@ interface AnimationOpts {
     endDelay: number,
     duration: number,
     easing: string,
-    autoPlay: boolean
+    autoPlay: boolean,
+    loop: boolean,
+    direction: IDirection
 }
 
-type ITarget = string | HTMLElement | (string | HTMLElement)[]
-type Options = AnimationOpts &{
+type Options = Partial<AnimationOpts> &{
     target: ITarget, 
     [animationKey: string]: any 
 }
+
+type ITarget = string | HTMLElement | (string | HTMLElement)[]
 type animationType = 'css' | 'attribute' | 'transform' | 'object'
 type Ivalue = number | number[] | string | string[]
+type IDirection = 'alternate' | 'reverse' | 'normal'
 
 interface TweenValue {
     number: number,
@@ -57,7 +61,9 @@ const defaultAnimationOpts = {
     endDelay: 0,
     easing: 'easeOutElastic(1, .5)',
     duration: 1000,
-    autoPlay: true
+    autoPlay: true,
+    loop: false,
+    direction: 'normal'
 }
 
 // 是否为动画属性
@@ -119,7 +125,10 @@ class Axi {
     private startTime: number
     private curTime: number = 0
     private lastTime: number = 0
-    public paused: boolean = true
+
+    private duration: number = 0 // delay + endDelay + duration
+    private paused: boolean = true
+    private reversed: boolean = false // reversed direction
 
     private rafId: number
 
@@ -157,6 +166,13 @@ class Axi {
 
     private setAnimationOpts(opts: Options) { // set animation options
         this.animationOpts = updateObjectProps(defaultAnimationOpts, opts)
+        const {
+            delay,
+            endDelay,
+            duration
+        } = this.animationOpts
+        this.duration = delay + endDelay + duration
+        this.reversed = this.animationOpts.direction === 'reverse'
     }
 
     private createAnimations() {
@@ -222,10 +238,8 @@ class Axi {
     }
 
     private animationStep(t: number) {
-        console.log('step')
-        if (!this.startTime) this.startTime = t
-        const progressT = t - this.startTime + this.lastTime
-        this.curTime = progressT // record current progress time
+        const progressT = this.calcProgressT(t)
+
         this.animations.forEach(item => {
             const tween = item.tweens.filter(d => progressT < d.end)[0]
             if (!tween) return
@@ -237,13 +251,22 @@ class Axi {
         if (!this.paused) this.execute()
     }
 
+    private calcProgressT(t: number) {
+        if (!this.startTime) this.startTime = t
+        const progressT = t - this.startTime + this.lastTime
+        this.curTime = progressT // record current progress time
+        return this.reversed ? this.duration - progressT : progressT
+    }
+
     private checkEnding(t: number) {
-        const {
-            delay,
-            endDelay,
-            duration
-        } = this.animationOpts
-        if (t >= delay + endDelay + duration) this.paused = true
+        const isEnd = this.reversed ? t <= 0 : t >= this.duration
+        if (isEnd) {
+            if (this.animationOpts.loop) {
+                this.restart()
+            } else {
+                this.paused = true
+            }
+        }
     }
 
     // control
@@ -256,7 +279,6 @@ class Axi {
     }
 
     public play() {
-        console.log('开始')
         if (!this.paused) return
         this.paused = false
         this.execute()

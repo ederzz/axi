@@ -1015,6 +1015,7 @@ function anime(params) {
     }
   }
 
+  // delay duration endDelay
   function setInstanceProgress(engineTime) {
     var insDuration = instance.duration;
     var insDelay = instance.delay;
@@ -1106,6 +1107,7 @@ function anime(params) {
     setTargetsValue(targets, properties);
     return instance;
   };
+  // delay + duration + endDelay
 
   instance.tick = function(t) { // tick开始时间
     now = t;

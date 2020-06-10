@@ -39,16 +39,18 @@
         import anime from './anime.es.js'
         const a = new Axi({
             target: '.a',
-            left: 500,
-            duration: 6000,
-            autoPlay: false
+            left: 300,
+            duration: 3000,
+            loop: true,
+            direction: 'reverse'
         })
 
-        anime({
-            targets: '.b',
-            left: 500,
-            duration: 3000
-        })
+        // anime({
+        //     targets: '.b',
+        //     left: 500,
+        //     duration: 3000,
+        //     loop: true
+        // })
 
         document.querySelector('.start').addEventListener('click', () => {
             a.play()
