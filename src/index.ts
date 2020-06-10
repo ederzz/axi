@@ -53,6 +53,8 @@ interface IAnimation {
     delay: number, 
     endDelay: number,
     prop: string, 
+    duration: number,
+    value: Ivalue,
     transformCache: { [k: string]: any },
     easing: (t: number) => number,
     tweens: ITween[]
@@ -113,8 +115,10 @@ function decomposeValue(val: Ivalue | number, unit: string) {
 // TODO: 测试object
 // TODO: 多段支持
 // TODO: tween start delay 
+// Axi = animation + ... + animation
+// animation = tween + ... + tween
 
-class Axi {
+class Axi { 
     private options: Options
 
     private animationOpts: AnimationOpts
@@ -128,7 +132,7 @@ class Axi {
     private curTime: number = 0
     private lastTime: number = 0
 
-    private duration: number = 0 // delay + endDelay + duration
+    private duration: number = 0 // delay + endDelay + duration : duration of Axi
     private paused: boolean = true
     private reversed: boolean = false // reversed direction
 
@@ -140,7 +144,9 @@ class Axi {
         this.setAnimationEles()
         this.setAnimationKeys(opts)
         this.createAnimations()
-        this.duration = this.animationOpts.duration + Math.max(...this.animations.map(d => d.delay)) + Math.max(...this.animations.map(d => d.endDelay))
+        this.duration = Math.max(...this.animations.map(d => d.duration)) 
+            + Math.max(...this.animations.map(d => d.delay)) 
+            + Math.max(...this.animations.map(d => d.endDelay))
 
         if (this.animationOpts.autoPlay) {
             this.paused = false
