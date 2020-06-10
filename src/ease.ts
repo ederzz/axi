@@ -43,7 +43,9 @@ const eases: IEases = {
     }
 }
 
-const easings: IEases = {}
+const easings: IEases = {
+    linear: () => (t: number) => t
+}
 
 for (const n in eases) {
     const easeIn = eases[ n ]

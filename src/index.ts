@@ -110,7 +110,6 @@ function decomposeValue(val: Ivalue | number, unit: string) {
 // TODO: transform 处理不到位
 // TODO: 测试object
 // TODO: 多段支持
-// TODO: seek reverse
 
 class Axi {
     private options: Options
@@ -239,14 +238,7 @@ class Axi {
 
     private animationStep(t: number) {
         const progressT = this.calcProgressT(t)
-
-        this.animations.forEach(item => {
-            const tween = item.tweens.filter(d => progressT < d.end)[0]
-            if (!tween) return
-            const eased = item.easing(minMax(progressT - tween.start - tween.delay, 0, tween.duration) / tween.duration)
-            const newVal = (tween.to.number - tween.from.number) * eased + tween.from.number
-            setProgressValue[item.type](item.target, item.prop, tween.to.unit ? newVal + tween.to.unit : newVal, item.type === 'transform' ? item.transformCache : null)
-        })
+        this.execAnimations(progressT)
         this.checkEnding(progressT)
         if (!this.paused) this.execute()
     }
@@ -258,9 +250,22 @@ class Axi {
         return this.reversed ? this.duration - progressT : progressT
     }
 
+    private execAnimations(progressT: number) {
+        this.animations.forEach(item => {
+            const tween = item.tweens.filter(d => progressT < d.end)[0]
+            if (!tween) return
+            const eased = item.easing(minMax(progressT - tween.start - tween.delay, 0, tween.duration) / tween.duration)
+            const newVal = (tween.to.number - tween.from.number) * eased + tween.from.number
+            setProgressValue[item.type](item.target, item.prop, tween.to.unit ? newVal + tween.to.unit : newVal, item.type === 'transform' ? item.transformCache : null)
+        })
+    }
+
     private checkEnding(t: number) {
         const isEnd = this.reversed ? t <= 0 : t >= this.duration
         if (isEnd) {
+            if (this.animationOpts.direction === 'alternate') {
+                this.reversed = !this.reversed
+            }
             if (this.animationOpts.loop) {
                 this.restart()
             } else {
@@ -291,7 +296,14 @@ class Axi {
         this.execute()
     }
 
-    public seek(t: number) {
+    public seek(p: number) {
+        const progressT = p * this.duration
+        this.execAnimations(this.reversed ? this.duration - progressT : progressT)
+    }
+
+    public reverse() {
+        this.reversed = !this.reversed
+        this.restart()
     }
 }
 
