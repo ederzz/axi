@@ -60,7 +60,8 @@ export function getTransforms(el: HTMLElement) {
 }
 
 function getTransformValue(el: HTMLElement, prop: string) {
-    return getTransforms(el)[prop]
+    const defaultVal = stringContains(prop, 'scale') ? 1 : 0 + getTransformUnit(prop)
+    return getTransforms(el)[prop] || defaultVal
 }
 
 export function getTargetOriValue(type: string, target: HTMLElement, prop: string) {
@@ -84,4 +85,13 @@ export const setProgressValue = {
         })
         t.style.transform = newVal
     }
+}
+
+function stringContains(str: string, text: string) {
+    return str.indexOf(text) > -1
+}
+
+function getTransformUnit(prop: string) {
+    if (stringContains(prop, 'translate') || prop === 'perspective') return 'px'
+    if (stringContains(prop, 'rotate') || stringContains(prop, 'skew')) return 'deg'
 }
