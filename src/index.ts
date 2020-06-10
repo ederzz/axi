@@ -10,8 +10,8 @@ import {
 } from './utils'
 
 interface AnimationOpts {
-    delay: number,
-    endDelay: number,
+    delay: IDelay,
+    endDelay: IDelay,
     duration: number,
     easing: string,
     autoPlay: boolean,
@@ -24,6 +24,8 @@ type Options = Partial<AnimationOpts> &{
     [animationKey: string]: any 
 }
 
+type DelayFunc = (el: any, idx: number, len: number) => number
+type IDelay = number | DelayFunc
 type ITarget = string | HTMLElement | (string | HTMLElement)[]
 type animationType = 'css' | 'attribute' | 'transform' | 'object'
 type Ivalue = number | number[] | string | string[]
@@ -110,6 +112,7 @@ function decomposeValue(val: Ivalue | number, unit: string) {
 // TODO: transform 处理不到位
 // TODO: 测试object
 // TODO: 多段支持
+// TODO: tween start delay 
 
 class Axi {
     private options: Options
@@ -137,6 +140,7 @@ class Axi {
         this.setAnimationEles()
         this.setAnimationKeys(opts)
         this.createAnimations()
+        this.duration = this.animationOpts.duration + Math.max(...this.animations.map(d => d.delay)) + Math.max(...this.animations.map(d => d.endDelay))
 
         if (this.animationOpts.autoPlay) {
             this.paused = false
@@ -170,31 +174,33 @@ class Axi {
             endDelay,
             duration
         } = this.animationOpts
-        this.duration = delay + endDelay + duration
         this.reversed = this.animationOpts.direction === 'reverse'
     }
 
     private createAnimations() {
         const animations: IAnimation[] = [].concat(
-            ...this.targets.map(target => {
+            ...this.targets.map((target, idx, ary) => {
                 const transformCache = getTransforms(target)
+                const {
+                    delay,
+                    endDelay,
+                    easing
+                } = this.animationOpts
+                const curDelay = typeof delay === 'number' ? delay : delay(target, idx, ary.length)
+                const curEndDelay = typeof endDelay === 'number' ? endDelay : endDelay(target, idx, ary.length)
+
                 return this.animationKeys.map(prop => {
-                    const {
-                        delay,
-                        endDelay,
-                        easing
-                    } = this.animationOpts
                     const type = getAnimationType(target, prop)
-                    const tweens = this.parseTweens( target, type, prop, this.options[ prop ] )
+                    const tweens = this.parseTweens( target, type, prop, this.options[ prop ], curDelay, curEndDelay )
                     
                     return {
                         target,
                         prop,
                         tweens,
-                        delay,
-                        endDelay,
                         type,
                         transformCache,
+                        delay: curDelay,
+                        endDelay: curEndDelay,
                         easing: parseEasing(easing),
                     }
                 })
@@ -203,10 +209,8 @@ class Axi {
         this.animations = animations
     }
 
-    private parseTweens(target: HTMLElement, type: string, prop: string, value: Ivalue/* value of tweens */) {
+    private parseTweens(target: HTMLElement, type: string, prop: string, value: Ivalue/* value of tweens */, delay: number, endDelay: number) {
         const {
-            delay,
-            endDelay,
             duration,
         } = this.animationOpts
         const oriValue = getTargetOriValue(type, target, prop)
@@ -252,9 +256,9 @@ class Axi {
 
     private execAnimations(progressT: number) {
         this.animations.forEach(item => {
-            const tween = item.tweens.filter(d => progressT < d.end)[0]
+            const tween = item.tweens.filter(d => progressT <= d.end)[0]
             if (!tween) return
-            const eased = item.easing(minMax(progressT - tween.start - tween.delay, 0, tween.duration) / tween.duration)
+            const eased = item.easing(minMax(progressT - tween.delay, 0, tween.duration) / tween.duration)
             const newVal = (tween.to.number - tween.from.number) * eased + tween.from.number
             setProgressValue[item.type](item.target, item.prop, tween.to.unit ? newVal + tween.to.unit : newVal, item.type === 'transform' ? item.transformCache : null)
         })
@@ -274,7 +278,7 @@ class Axi {
         }
     }
 
-    // control
+    // ===== control ======
     public pause() {
         if (this.paused) return
         cancelAnimationFrame(this.rafId)

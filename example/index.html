@@ -25,6 +25,9 @@
 </head>
 <body>
     <div class="a"></div>
+    <div class="a"></div>
+    <div class="a"></div>
+    <div class="b"></div>
     <div class="b"></div>
     <div class="c"></div>
     <div class="actions">
@@ -39,22 +42,24 @@
         import anime from './anime.es.js'
         const a = new Axi({
             target: '.a',
-            left: 300,
+            left: 500,
             duration: 3000,
-            autoPlay: false,
-            loop: true,
-            direction: 'reverse',
-            easing: 'linear'
+            // autoPlay: false,
+            delay(_, i) { return i * 1000 + 2000 },
+            // easing: 'linear'
         })
+        console.log(a.duration)
 
-        anime({
+        const b = anime({
             targets: '.b',
             left: 500,
             duration: 3000,
+            delay: (_, i) => i * 1000 + 2000
             // direction: 'reverse'
             // direction: 'alternate',
             // loop: true
         })
+        console.log(b.duration)
 
         document.querySelector('.start').addEventListener('click', () => {
             a.play()
@@ -67,7 +72,7 @@
         })
         document.querySelector('.range').addEventListener('input', (e) => {
             console.log(e.target.value / 100)
-            a.seek(e.target.value / 100)
+            a.seek(1)
         })
 
         // new Axi({
