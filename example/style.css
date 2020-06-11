@@ -3,7 +3,7 @@ body {
 }
 .demo {
     width: 380px;
-    height: 200px;
+    min-height: 200px;
     border: 1px solid rgba(0,0,0,.65);
 }
 h2 {
@@ -11,21 +11,25 @@ h2 {
     color: rgb(246, 244, 242);
     font-weight: 400;
     margin: 0 20px;
-    padding: 20px 0;
+    padding-top: 20px;
 }
 .animations {
     width: 300px;
-    height: 140px;
+    min-height: 140px;
     position: relative;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    padding: 20px 0;
 }
 .line {
     position: relative;
     width: 300px;
     height: 28px;
+}
+.line.small {
+    height: 2px;
 }
 .line:not(:last-child) {
     margin-bottom: 5px;
@@ -36,6 +40,10 @@ h2 {
     width: 28px;
     height: 28px;
     left: 0;
+}
+.box.small {
+    height: 2px;
+    margin: 1px 0;
 }
 .shadow {
     opacity: .2;

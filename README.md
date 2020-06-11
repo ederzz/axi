@@ -2,7 +2,6 @@
 
 Animation engine.
 
-## TODO
+## thx
 
-- any类型限制
-- 缓动 // BezierEasing https://github.com/gre/bezier-easin
+Inspired by [anime](https://github.com/juliangarnier/anime).

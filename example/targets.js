@@ -1,11 +1,9 @@
-const body = document.querySelector('body')
-var demos = [
-    newAxiDemoEl({ cls: 'css-selector', title: 'CSS SELECTOR', count: 1 }),
-    newAxiDemoEl({ cls: 'nodelist', title: 'DOM NODE / NODELIST', count: 3 }),
-]
-demos.forEach(el => {
-    body.appendChild(el)
-})
+addSectionTitle('TARGETS')
+
+addDemos([
+    { cls: 'css-selector', title: 'CSS SELECTOR', count: 1 },
+    { cls: 'nodelist', title: 'DOM NODE / NODELIST', count: 3 }
+])
 
 var box = ' .box:not(.shadow)'
 new Axi({

@@ -113,9 +113,11 @@ function decomposeValue(val: Ivalue | number, unit: string) {
 // TODO: 性能测试
 // TODO: transform 处理不到位
 // TODO: 测试object
-// TODO: 多段支持
 // TODO: tween start delay 
 // TODO: 离开页面后恢复
+// TODO: 提供vue/react使用
+
+// hooks: update begin complete loopbegin loopcomplete change changeBegin chanageComplete finished
 
 // Axi = animation + ... + animation
 // animation = tween + ... + tween

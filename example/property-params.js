@@ -1,9 +1,8 @@
-var demos = [
-    newAxiDemoEl({ cls: 'spec-prop-params', title: 'SPECIFIC PROPERTY PARAMETERS', count: 1 }),
-]
-demos.forEach(el => {
-    body.appendChild(el)
-})
+addSectionTitle('PROPERTY-PARAMS')
+
+addDemos([
+    { cls: 'spec-prop-params', title: 'SPECIFIC PROPERTY PARAMETERS', count: 1 }
+])
 
 var box = ' .box:not(.shadow)'
 new Axi({
