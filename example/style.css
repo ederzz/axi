@@ -1,0 +1,42 @@
+body {
+    background-color: #252423;
+}
+.demo {
+    width: 380px;
+    height: 200px;
+    border: 1px solid rgba(0,0,0,.65);
+}
+h2 {
+    font-size: 14px;
+    color: rgb(246, 244, 242);
+    font-weight: 400;
+    margin: 0 20px;
+    padding: 20px 0;
+}
+.animations {
+    width: 300px;
+    height: 140px;
+    position: relative;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.line {
+    position: relative;
+    width: 300px;
+    height: 28px;
+}
+.line:not(:last-child) {
+    margin-bottom: 5px;
+}
+.box {
+    background-color: rgb(255, 75, 75);
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    left: 0;
+}
+.shadow {
+    opacity: .2;
+}

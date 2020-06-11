@@ -4,100 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <style>
-        .a,
-        .b,
-        .c {
-            width: 50px;
-            height: 50px;
-            background-color: rgb(46, 236, 46);
-            position: relative;
-        }
-        .a {
-            top: 50px;
-        }
-        .b {
-            background-color: rgb(228, 66, 66);
-            top: 100px;
-        }
-        .c {
-            background-color: rgb(45, 230, 236);
-            top: 150px;
-        }
-    </style>
+    <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-    <div class="a"></div>
-    <!-- <div class="a"></div>
-    <div class="a"></div> -->
-    <div class="b"></div>
-    <div class="b"></div>
-    <div class="c"></div>
-    <div class="actions">
-        <button class="start">开始</button>
-        <button class="pause">暂停</button>
-        <button class="restart">重启</button>
-        <input class="range" type="range" />
-    </div>
-
-    <script type="module">
-        import Axi from '../lib/axi.es.js'
-        import anime from './anime.es.js'
-        const a = new Axi({
-            target: '.a',
-            translateX: {
-                value: 250,
-                duration: 800
-            },
-            rotate: {
-                value: 360,
-                duration: 1800,
-                easing: 'easeInOutSine'
-            },
-            scale: {
-                value: 2,
-                duration: 1600,
-                delay: 800,
-                easing: 'easeInOutQuart'
-            },
-            delay: 250
-            // easing: 'linear'
-        })
-        console.log(a.duration)
-
-        const b = anime({
-            targets: '.b',
-            left: 500,
-            duration: 3000,
-            delay: (_, i) => i * 1000 + 2000
-            // direction: 'reverse'
-            // direction: 'alternate',
-            // loop: true
-        })
-        console.log(b.duration)
-
-        document.querySelector('.start').addEventListener('click', () => {
-            a.play()
-        })
-        document.querySelector('.pause').addEventListener('click', () => {
-            a.pause()
-        })
-        document.querySelector('.restart').addEventListener('click', () => {
-            a.restart()
-        })
-        document.querySelector('.range').addEventListener('input', (e) => {
-            console.log(e.target.value / 100)
-            a.seek(1)
-        })
-
-        // new Axi({
-        //     autoPlay: true,
-        //     target: '.c',
-        //     translateX: '500px',
-        //     scale: 2,
-        //     rotate: '1turn',
-        //     easing: 'easeOutElastic'
-        // })
-    </script>
+    <script src="../lib/axi.umd.js"></script>
+    <script src="./demoCreator.js"></script>
+    <script src="./targets.js"></script>
+    <script src="./property-params.js"></script>
 </body>
 </html>

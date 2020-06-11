@@ -115,6 +115,8 @@ function decomposeValue(val: Ivalue | number, unit: string) {
 // TODO: 测试object
 // TODO: 多段支持
 // TODO: tween start delay 
+// TODO: 离开页面后恢复
+
 // Axi = animation + ... + animation
 // animation = tween + ... + tween
 
