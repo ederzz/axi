@@ -15,29 +15,55 @@
 </head>
 <body>
     <div class="a"></div>
+    <div class="b"></div>
+    <div class="c"></div>
+    <div class="d"></div>
+    <div class="e"></div>
+    <div class="f"></div>
 
     <script type="module">
         import anime from './anime.es.js'
+        const el = document.querySelector('.b')
+        const el2 = document.querySelector('.c')
+        const progress = document.querySelector('.d')
+        const el3 = document.querySelector('.e')
+        const el4 = document.querySelector('.f')
+
+        var loopBegan = 0;
+        var loopCompleted = 0;
+        var changeBegan = 0;
+        var changeCompleted = 0;
+
 
         anime({
             targets: '.a',
-            translateX: {
-                value: 250,
-                duration: 800
+            loopBegin: function(anim) {
+                loopBegan++;
+                el.innerHTML = 'loop began : ' + loopBegan;
             },
-            rotate: {
-                value: 360,
-                duration: 1800,
-                easing: 'easeInOutSine'
+            loopComplete: function(anim) {
+                loopCompleted++;
+                el2.innerHTML = 'loop completed : ' + loopCompleted;
             },
-            scale: {
-                value: 2,
-                duration: 1600,
-                delay: 800,
-                easing: 'easeInOutQuart'
+            translateX: 240,
+            delay: 1000,
+            endDelay: 1000,
+            // loop: true,
+            direction: 'alternate',
+            easing: 'easeInOutCirc',
+            update: function(anim) {
+                progress.innerHTML = 'progress : '+Math.round(anim.progress)+'%';
             },
-            delay: 250
+            changeBegin: function(anim) {
+                changeBegan++;
+                el3.innerHTML = 'change began : ' + changeBegan;
+            },
+            changeComplete: function(anim) {
+                changeCompleted++;
+                el4.innerHTML = 'change completed : ' + changeCompleted;
+            }
         });
+
     </script>
 </body>
 </html>

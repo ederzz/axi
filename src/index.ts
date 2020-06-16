@@ -19,7 +19,16 @@ interface AnimationOpts {
     direction: IDirection
 }
 
-type Options = Partial<AnimationOpts> &{
+interface IHooks {
+    axiStart: () => void,
+    axiEnd: () => void,
+    loopStart: () => void,
+    loopEnd: () => void,
+    updateStart: () => void,
+    updateEnd: () => void,
+}
+
+type Options = Partial<AnimationOpts> & Partial<IHooks> & {
     target: ITarget, 
     [animationKey: string]: any 
 }
@@ -70,6 +79,15 @@ const defaultAnimationOpts = {
     direction: 'normal'
 }
 
+const defaultHooks = {
+    axiStart: () => {},
+    axiEnd: () => {},
+    loopStart: () => {},
+    loopEnd: () => {},
+    updateStart: () => {},
+    updateEnd: () => {}
+}
+
 // 是否为动画属性
 function isAnimationKey(k: string): boolean {
     return k !== 'target' && !defaultAnimationOpts.hasOwnProperty(k) 
@@ -116,8 +134,13 @@ function decomposeValue(val: Ivalue | number, unit: string) {
 // TODO: tween start delay 
 // TODO: 离开页面后恢复
 // TODO: 提供vue/react使用
+// TODO: 验证私有属性
+// TODO: loop hook 有问题
 
-// hooks: update begin complete loopbegin loopcomplete change changeBegin chanageComplete finished
+// progress 是否有可能小于100
+// progress 反向
+// change应该是单趟
+// loop可能是正反两趟
 
 // Axi = animation + ... + animation
 // animation = tween + ... + tween
@@ -126,7 +149,7 @@ class Axi {
     private options: Options
 
     private animationOpts: AnimationOpts
-    private hooks: Function[] // func of hooks
+    private hooks: IHooks // func of hooks
 
     private targets: HTMLElement[] // targets of animation
     private animationKeys: string[]
@@ -141,10 +164,13 @@ class Axi {
     private reversed: boolean = false // reversed direction
 
     private rafId: number
+    public axiStarted = false
+    public axiEnded = false
 
     constructor(opts: Options) {
         this.options = opts
         this.setAnimationOpts(opts) 
+        this.setHooks(opts) 
         this.setAnimationEles()
         this.setAnimationKeys(opts)
         this.createAnimations()
@@ -152,10 +178,7 @@ class Axi {
             + Math.max(...this.animations.map(d => d.delay)) 
             + Math.max(...this.animations.map(d => d.endDelay))
 
-        if (this.animationOpts.autoPlay) {
-            this.paused = false
-            this.execute()
-        }
+        if (this.animationOpts.autoPlay) this.play()
     }
 
     private setAnimationKeys(opts: Options) {
@@ -180,6 +203,10 @@ class Axi {
     private setAnimationOpts(opts: Options) { // set animation options
         this.animationOpts = updateObjectProps(defaultAnimationOpts, opts)
         this.reversed = this.animationOpts.direction === 'reverse'
+    }
+    
+    private setHooks(opts: Options) {
+        this.hooks = updateObjectProps(defaultHooks, opts)
     }
 
     private createAnimations() {
@@ -261,7 +288,9 @@ class Axi {
 
     private animationStep(t: number) {
         const progressT = this.calcProgressT(t)
+        this.hooks.updateStart()
         this.execAnimations(progressT)
+        this.hooks.updateEnd()
         this.checkEnding(progressT)
         if (!this.paused) this.execute()
     }
@@ -285,6 +314,7 @@ class Axi {
 
     private checkEnding(t: number) {
         const isEnd = this.reversed ? t <= 0 : t >= this.duration
+        // TODO: 控制剩余运动次数
         if (isEnd) {
             if (this.animationOpts.direction === 'alternate') {
                 this.reversed = !this.reversed
@@ -293,6 +323,8 @@ class Axi {
                 this.restart()
             } else {
                 this.paused = true
+                this.axiEnded = true
+                this.hooks.axiEnd()
             }
         }
     }
@@ -309,6 +341,11 @@ class Axi {
     public play() {
         if (!this.paused) return
         this.paused = false
+        if (!this.axiStarted) {
+            this.axiStarted = true
+            this.axiEnded = false
+            this.hooks.axiStart()
+        }
         this.execute()
     }
 
@@ -316,10 +353,15 @@ class Axi {
         this.paused = false
         this.startTime = 0
         this.curTime = 0
+
+        this.axiStarted = true
+        this.axiEnded = false
+        this.hooks.axiStart()
+        
         this.execute()
     }
 
-    public seek(p: number) {
+    public seek(p: number) { // seek会触发生命周期吗 TODO:
         const progressT = p * this.duration
         this.execAnimations(this.reversed ? this.duration - progressT : progressT)
     }

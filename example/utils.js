@@ -1,6 +1,6 @@
 const body = document.querySelector('body')
 
-function newAxiDemoEl({ cls, title, count, renderLines, click = () => {} }) {
+function newAxiDemoEl({ cls, title, count, renderLines, click = () => {}, extra }) {
     const div = document.createElement('div')
     div.addEventListener('click', click)
     div.classList.add('demo')
@@ -21,6 +21,12 @@ function newAxiDemoEl({ cls, title, count, renderLines, click = () => {} }) {
         </div> 
     `
     div.innerHTML = content
+    if (extra) {
+        const extraDiv = document.createElement('div')
+        extraDiv.classList.add('extra')
+        extraDiv.innerHTML = extra
+        div.querySelector('.animations').appendChild(extraDiv)
+    }
     return div
 }
 
