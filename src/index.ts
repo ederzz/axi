@@ -37,7 +37,7 @@ type DelayFunc = (el: any, idx: number, len: number) => number
 type IDelay = number | DelayFunc
 type ITarget = string | HTMLElement | (string | HTMLElement)[]
 type animationType = 'css' | 'attribute' | 'transform' | 'object'
-type Ivalue = number | number[] | string | string[] 
+type Ivalue = number | number[] | string | string[] // TODO: 总结可用value
 type IDirection = 'alternate' | 'reverse' | 'normal'
 
 interface TweenValue {
@@ -119,7 +119,6 @@ function decomposeValue(val: Ivalue | number, unit: string) {
 // TODO: getHooks
 // TODO: 处理查找元素 setAnimationEles
 // TODO: 命名
-// TODO: 整理tween的属性
 // TODO: 整理其他的参数 keyframes svg ...
 // TODO: 添加注释和ts类型
 // TODO: 颜色值特殊处理
@@ -136,6 +135,7 @@ function decomposeValue(val: Ivalue | number, unit: string) {
 // TODO: 提供vue/react使用
 // TODO: 验证私有属性
 // TODO: loop hook 有问题
+// TODO: 添加progress属性
 
 // progress 是否有可能小于100
 // progress 反向
@@ -164,6 +164,7 @@ class Axi {
     private reversed: boolean = false // reversed direction
 
     private rafId: number
+    private restLoopCount: number
     public axiStarted = false
     public axiEnded = false
 
@@ -178,7 +179,10 @@ class Axi {
             + Math.max(...this.animations.map(d => d.delay)) 
             + Math.max(...this.animations.map(d => d.endDelay))
 
-        if (this.animationOpts.autoPlay) this.play()
+        if (this.animationOpts.autoPlay) {
+            this.play()
+            this.restLoopCount--
+        }
     }
 
     private setAnimationKeys(opts: Options) {
@@ -202,7 +206,12 @@ class Axi {
 
     private setAnimationOpts(opts: Options) { // set animation options
         this.animationOpts = updateObjectProps(defaultAnimationOpts, opts)
-        this.reversed = this.animationOpts.direction === 'reverse'
+        const {
+            direction,
+            loop
+        } = this.animationOpts
+        this.reversed = direction === 'reverse'
+        this.restLoopCount = loop ? -1 : ( direction === 'alternate' ? 2 : 1 )
     }
     
     private setHooks(opts: Options) {
@@ -288,9 +297,9 @@ class Axi {
 
     private animationStep(t: number) {
         const progressT = this.calcProgressT(t)
-        this.hooks.updateStart()
+        this.hooks.updateStart() // hook: start of every update.
         this.execAnimations(progressT)
-        this.hooks.updateEnd()
+        this.hooks.updateEnd() // hook: end of every update.
         this.checkEnding(progressT)
         if (!this.paused) this.execute()
     }
@@ -314,14 +323,15 @@ class Axi {
 
     private checkEnding(t: number) {
         const isEnd = this.reversed ? t <= 0 : t >= this.duration
-        // TODO: 控制剩余运动次数
+
         if (isEnd) {
             if (this.animationOpts.direction === 'alternate') {
                 this.reversed = !this.reversed
             }
-            if (this.animationOpts.loop) {
+            if (this.restLoopCount > 0 || this.restLoopCount === -1) {
+                if (this.restLoopCount > 0) this.restLoopCount--
                 this.restart()
-            } else {
+            } else { // hook: end of axi
                 this.paused = true
                 this.axiEnded = true
                 this.hooks.axiEnd()
@@ -341,7 +351,7 @@ class Axi {
     public play() {
         if (!this.paused) return
         this.paused = false
-        if (!this.axiStarted) {
+        if (!this.axiStarted) { // hook: start of axi.
             this.axiStarted = true
             this.axiEnded = false
             this.hooks.axiStart()
