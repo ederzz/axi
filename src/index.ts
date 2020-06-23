@@ -6,7 +6,10 @@ import {
     getAnimationType,
     setProgressValue,
     getTargetOriValue,
-    getTransforms
+    getTransforms,
+    isObj,
+    isSvg,
+    getAttribute
 } from './utils'
 
 interface AnimationOpts {
@@ -37,7 +40,7 @@ type DelayFunc = (el: any, idx: number, len: number) => number
 type IDelay = number | DelayFunc
 type ITarget = string | HTMLElement | (string | HTMLElement)[]
 type animationType = 'css' | 'attribute' | 'transform' | 'object'
-type Ivalue = number | number[] | string | string[] // TODO: 总结可用value
+type Ivalue = number | number[] | string | string[] | PathTweenVal | PathTweenVal[] // TODO: path object
 type IDirection = 'alternate' | 'reverse' | 'normal'
 
 interface TweenValue {
@@ -51,9 +54,10 @@ interface ITween {
     end: number,
     delay: number,
     duration: number,
-    value: number | string,
+    value: number | string | PathTweenVal,
     from: TweenValue,
     to: TweenValue,
+    isPath: boolean
 }
 
 interface IAnimation {
@@ -67,6 +71,29 @@ interface IAnimation {
     transformCache: { [k: string]: any },
     easing: (t: number) => number,
     tweens: ITween[]
+}
+// TODO: 
+function getParentSvg(el: SVGPathElement) {
+    let parent = el.parentNode
+    while (!isSvg(parent)) {
+        parent = parent.parentNode
+    }
+    return parent
+}
+
+interface SvgInfo {
+    el: SVGElement,
+    xScale: number,
+    yScale: number,
+    x: number,
+    y: number,
+}
+
+interface PathTweenVal {
+    prop: string,
+    el: SVGPathElement,
+    svg: SvgInfo,
+    totalLength: number
 }
 
 const defaultAnimationOpts = {
@@ -93,6 +120,10 @@ function isAnimationKey(k: string): boolean {
     return k !== 'target' && !defaultAnimationOpts.hasOwnProperty(k) 
 }
 
+function isPathVal(val: any): val is PathTweenVal  {
+    return isObj(val) && val.hasOwnProperty('totalLength')
+}
+
 function parseEasing(n: string) {
     const easingName = n.split('(')[0]
     const ease = easings[ easingName ]
@@ -102,14 +133,31 @@ function parseEasing(n: string) {
     return ease.apply(null, params)
 }
 
-function decomposeValue(val: Ivalue | number, unit: string) {
-    var reg = /[+-]?\d*\.?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g
-    const matchRet = (val + '').match(reg)
+function decomposeValue(val: Ivalue, unit: string) {
+    const reg = /[+-]?\d*\.?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g
+    const matchRet = ((isPathVal(val) ? val.totalLength : val) + '').match(reg)
 
     return {
         original: val,
         number: matchRet ? +matchRet[0] : 0,
         unit
+    }
+}
+
+function getPoint(el: SVGPathElement, curLen: number) {
+    return el.getPointAtLength(curLen >= 1 ? curLen : 0)
+}
+
+function getPathProgressVal(value: PathTweenVal, progress: number) {
+    const { prop, el, svg, totalLength } = value
+    const len = totalLength * progress // TODO: round
+    const current = getPoint( el, len )
+    const prev = getPoint( el, len - 1 )
+    const next = getPoint( el, len + 1 )
+    switch (prop) {
+        case 'x': return current.x - svg.x
+        case 'y': return current.y - svg.y
+        case 'angle': return Math.atan2(next.y - prev.y, next.x - prev.x) * 180 / Math.PI // TODO: math
     }
 }
 
@@ -136,6 +184,7 @@ function decomposeValue(val: Ivalue | number, unit: string) {
 // TODO: 验证私有属性
 // TODO: loop hook 有问题
 // TODO: 添加progress属性
+// TODO: 变更值的类型 svgpath等类型
 
 // progress 是否有可能小于100
 // progress 反向
@@ -267,11 +316,11 @@ class Axi {
         } = opts
         const oriValue = getTargetOriValue(type, target, prop)
         const oriUnit = parseUnit(oriValue)
-        const vals = Array.isArray(value) ? (value as string[] | number[]) : [ value ]
+        const vals = Array.isArray(value) ? value : [ value ]
         const len = vals.length
         const durationPiece = duration / len
 
-        return (vals as string[]).map((d: string, i: number) => {
+        return (vals as string[]).map((d: Ivalue, i: number) => {
             const fromVal = i === 0 ? oriValue : vals[ i - 1 ]
             const from = decomposeValue(fromVal, parseUnit(fromVal) || oriUnit)
             const toVal = vals[i]
@@ -281,6 +330,7 @@ class Axi {
                 end: delay + durationPiece * (i + 1) + (i === len - 1 ? endDelay : 0),
                 duration: durationPiece,
                 value: d,
+                isPath: isPathVal(d),
                 delay,
                 from,
                 to
@@ -313,7 +363,9 @@ class Axi {
             const tween = item.tweens.filter(d => progressT <= d.end)[0]
             if (!tween) return
             const eased = item.easing(minMax(progressT - tween.delay, 0, tween.duration) / tween.duration)
-            const newVal = (tween.to.number - tween.from.number) * eased + tween.from.number
+            let newVal
+            if (tween.isPath) newVal = getPathProgressVal(tween.value as PathTweenVal, eased)
+            else newVal = (tween.to.number - tween.from.number) * eased + tween.from.number
             setProgressValue[item.type](item.target, item.prop, tween.to.unit ? newVal + tween.to.unit : newVal, item.type === 'transform' ? item.transformCache : null)
         })
     }
@@ -384,6 +436,33 @@ class Axi {
     public reverse() {
         this.reversed = !this.reversed
         this.restart()
+    }
+
+    // get path of animation
+    // TODO: type
+    public getAxiPath(el: string | SVGPathElement) {
+        const path: SVGPathElement = typeof el === 'string' ? document.querySelector(el) : el
+        return (prop: string) => ({
+            prop,
+            el: path,
+            svg: getSvgInfo(path),
+            totalLength: path.getTotalLength() // TODO: 兼容其他元素和比例
+        } as PathTweenVal)
+    }
+}
+
+function getSvgInfo(el: SVGPathElement) {
+    const svg = getParentSvg(el)
+    const { width, height } = svg.getBoundingClientRect()
+    const viewBoxAttr = getAttribute(svg, 'viewBox')
+    const viewBox = (svg as any).viewBox || ( viewBoxAttr && viewBoxAttr.split(' ') || [ 0, 0, width, height ] )
+
+    return {
+        el: svg,
+        x: viewBox[0],
+        y: viewBox[1],
+        xScale: width / viewBox[2], // 0 value TODO:
+        yScale: height / viewBox[3],
     }
 }
 

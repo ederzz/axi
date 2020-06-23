@@ -1,5 +1,6 @@
-export function parseUnit(val: string | number) {
-    var split = /[+-]?\d*\.?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?(%|px|pt|em|rem|in|cm|mm|ex|ch|pc|vw|vh|vmin|vmax|deg|rad|turn)?$/.exec(val + '');
+export function parseUnit(val: string | number | object) {
+    if (typeof val === 'object') return '' // TODO:
+    const split = /[+-]?\d*\.?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?(%|px|pt|em|rem|in|cm|mm|ex|ch|pc|vw|vh|vmin|vmax|deg|rad|turn)?$/.exec(val + '');
     if (split) return split[1] || ''
 }
 
@@ -30,7 +31,7 @@ export function isDom(ele: HTMLElement) {
 
 const validTransforms = ['translateX', 'translateY', 'translateZ', 'rotate', 'rotateX', 'rotateY', 'rotateZ', 'scale', 'scaleX', 'scaleY', 'scaleZ', 'skew', 'skewX', 'skewY', 'perspective', 'matrix', 'matrix3d'];
 
-export function getAttribute(el: HTMLElement, prop: string) {
+export function getAttribute(el: Element, prop: string) {
     return el.getAttribute(prop);
 }
 
@@ -86,6 +87,9 @@ export const setProgressValue = {
         t.style.transform = newVal
     }
 }
+
+export const isObj = (val: any) => stringContains(String.prototype.toString.call(val), 'object')
+export const isSvg = (el: any): el is SVGElement => el instanceof SVGElement
 
 function stringContains(str: string, text: string) {
     return str.indexOf(text) > -1
