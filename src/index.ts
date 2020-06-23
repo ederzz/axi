@@ -179,10 +179,7 @@ class Axi {
             + Math.max(...this.animations.map(d => d.delay)) 
             + Math.max(...this.animations.map(d => d.endDelay))
 
-        if (this.animationOpts.autoPlay) {
-            this.play()
-            this.restLoopCount--
-        }
+        if (this.animationOpts.autoPlay) this.newLoop()
     }
 
     private setAnimationKeys(opts: Options) {
@@ -325,12 +322,12 @@ class Axi {
         const isEnd = this.reversed ? t <= 0 : t >= this.duration
 
         if (isEnd) {
+            this.hooks.loopEnd() // hook: end of loop
             if (this.animationOpts.direction === 'alternate') {
                 this.reversed = !this.reversed
             }
             if (this.restLoopCount > 0 || this.restLoopCount === -1) {
-                if (this.restLoopCount > 0) this.restLoopCount--
-                this.restart()
+                this.newLoop()
             } else { // hook: end of axi
                 this.paused = true
                 this.axiEnded = true
@@ -351,11 +348,6 @@ class Axi {
     public play() {
         if (!this.paused) return
         this.paused = false
-        if (!this.axiStarted) { // hook: start of axi.
-            this.axiStarted = true
-            this.axiEnded = false
-            this.hooks.axiStart()
-        }
         this.execute()
     }
 
@@ -374,6 +366,19 @@ class Axi {
     public seek(p: number) { // seek会触发生命周期吗 TODO:
         const progressT = p * this.duration
         this.execAnimations(this.reversed ? this.duration - progressT : progressT)
+    }
+
+    public newLoop() {
+        if (this.restLoopCount > 0) this.restLoopCount--
+        if (!this.axiStarted) { // hook: start of axi.
+            this.axiStarted = true
+            this.axiEnded = false
+            this.hooks.axiStart()
+        }
+        this.hooks.loopStart() // hook: start of loop
+        this.startTime = 0
+        this.curTime = 0
+        this.execute()
     }
 
     public reverse() {
