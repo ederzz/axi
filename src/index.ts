@@ -161,6 +161,21 @@ function getPathProgressVal(value: PathTweenVal, progress: number) {
     }
 }
 
+function getSvgInfo(el: SVGPathElement) {
+    const svg = getParentSvg(el)
+    const { width, height } = svg.getBoundingClientRect()
+    const viewBoxAttr = getAttribute(svg, 'viewBox')
+    const viewBox = (svg as any).viewBox || ( viewBoxAttr && viewBoxAttr.split(' ') || [ 0, 0, width, height ] )
+
+    return {
+        el: svg,
+        x: viewBox[0],
+        y: viewBox[1],
+        xScale: width / viewBox[2], // 0 value TODO:
+        yScale: height / viewBox[3],
+    }
+}
+
 // TODO: 所有的缓动参数
 // TODO: 所有可以更新的属性
 // TODO: 要执行的所有动画
@@ -448,21 +463,6 @@ class Axi {
             svg: getSvgInfo(path),
             totalLength: path.getTotalLength() // TODO: 兼容其他元素和比例
         } as PathTweenVal)
-    }
-}
-
-function getSvgInfo(el: SVGPathElement) {
-    const svg = getParentSvg(el)
-    const { width, height } = svg.getBoundingClientRect()
-    const viewBoxAttr = getAttribute(svg, 'viewBox')
-    const viewBox = (svg as any).viewBox || ( viewBoxAttr && viewBoxAttr.split(' ') || [ 0, 0, width, height ] )
-
-    return {
-        el: svg,
-        x: viewBox[0],
-        y: viewBox[1],
-        xScale: width / viewBox[2], // 0 value TODO:
-        yScale: height / viewBox[3],
     }
 }
 

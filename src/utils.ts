@@ -99,3 +99,57 @@ function getTransformUnit(prop: string) {
     if (stringContains(prop, 'translate') || prop === 'perspective') return 'px'
     if (stringContains(prop, 'rotate') || stringContains(prop, 'skew')) return 'deg'
 }
+
+function getCircleLength(el: SVGCircleElement) {
+    return Math.PI * 2 * +getAttribute(el, 'r')
+}
+
+function getRectLength(el: SVGRectElement) {
+    return 2 * ( +getAttribute(el, 'width') + (+getAttribute(el, 'height')))
+}
+
+type Point = [ number, number ]
+
+function getLineLength(el: SVGLineElement) {
+    const p1: Point = [ +getAttribute(el, 'x1'), +getAttribute(el, 'y1') ]
+    const p2: Point = [ +getAttribute(el, 'x2'), +getAttribute(el, 'y2') ]
+    return getDistance(p1, p2)
+}
+
+function getDistance(p1: Point, p2: Point) {
+    const w = p1[0] - p2[0]
+    const h = p1[1] - p2[1]
+    return Math.sqrt( w * w + h * h )
+}
+
+// 兼容多个空格分隔 TODO: el.points实现
+function getPolylineLength(el: SVGPolylineElement) {
+    const points = getAttribute(el, 'points').split(' ')
+    const len = points.length
+    return points.reduce((l, point, i) => {
+        if (i === len - 1) return l + 0
+        const next = point[i + 1]
+        const p1 = point.split(',').map(d => +d)
+        const p2 = next.split(',').map(d => +d)
+        return l + getDistance(p1 as Point, p2 as Point)
+    }, 0)
+}
+
+function getPolygonLength(el: SVGPolygonElement) {
+
+}
+
+// get total length of path(path, cirlce, rect, line, polyline, polygon)
+export function getTotalLength(el: any) {
+    if (el.getTotalLength) return el.getTotalLength()
+
+    const n = el.tagName.toLowerCase() 
+    switch (n) {
+        case 'circle': getCircleLength(el)
+        case 'rect': getRectLength(el)
+        case 'line': getLineLength(el)
+        case 'polyline': getPolylineLength(el)
+        case 'polygon': getPolygonLength(el)
+        // TODO: throw error
+    }
+}
