@@ -1,6 +1,6 @@
 const body = document.querySelector('body')
 
-function newAxiDemoEl({ cls, title, count, renderLines, click = () => {}, extra }) {
+function newAxiDemoEl({ cls, title, count, renderLines, click = () => {}, extra, color = 'rgb(255, 75, 75)' }) {
     const div = document.createElement('div')
     div.addEventListener('click', click)
     div.classList.add('demo')
@@ -13,8 +13,8 @@ function newAxiDemoEl({ cls, title, count, renderLines, click = () => {}, extra 
                     ? renderLines()
                     : (new Array(count)).fill(1).map(() => `
                         <div class="line">
-                            <div class="box shadow"></div>
-                            <div class="box"></div>
+                            <div style="background: ${ color };opacity: .2;" class="box shadow"></div>
+                            <div style="background: ${ color };" class="box"></div>
                         </div>
                     `).join('')
             }

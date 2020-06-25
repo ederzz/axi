@@ -25,10 +25,6 @@ export function minMax(a: number, b: number, c: number) {
     return Math.min(Math.max(a, b), c)
 }
 
-export function isDom(ele: HTMLElement) {
-    return ele.nodeType
-}
-
 const validTransforms = ['translateX', 'translateY', 'translateZ', 'rotate', 'rotateX', 'rotateY', 'rotateZ', 'scale', 'scaleX', 'scaleY', 'scaleZ', 'skew', 'skewX', 'skewY', 'perspective', 'matrix', 'matrix3d'];
 
 export function getAttribute(el: Element, prop: string) {
@@ -88,8 +84,11 @@ export const setProgressValue = {
     }
 }
 
-export const isObj = (val: any) => stringContains(String.prototype.toString.call(val), 'object')
+export const isObj = (val: any) => stringContains(Object.prototype.toString.call(val), 'object')
 export const isSvg = (el: any): el is SVGElement => el instanceof SVGElement
+export function isDom(ele: HTMLElement) {
+    return ele.nodeType || isSvg(ele)
+}
 
 function stringContains(str: string, text: string) {
     return str.indexOf(text) > -1
@@ -108,35 +107,31 @@ function getRectLength(el: SVGRectElement) {
     return 2 * ( +getAttribute(el, 'width') + (+getAttribute(el, 'height')))
 }
 
-type Point = [ number, number ]
-
 function getLineLength(el: SVGLineElement) {
-    const p1: Point = [ +getAttribute(el, 'x1'), +getAttribute(el, 'y1') ]
-    const p2: Point = [ +getAttribute(el, 'x2'), +getAttribute(el, 'y2') ]
-    return getDistance(p1, p2)
+    const p1 = { x: +getAttribute(el, 'x1'), y: +getAttribute(el, 'y1') }
+    const p2 = { x: +getAttribute(el, 'x2'), y: +getAttribute(el, 'y2') }
+    return getDistance(p1 as SVGPoint, p2 as SVGPoint)
 }
 
-function getDistance(p1: Point, p2: Point) {
-    const w = p1[0] - p2[0]
-    const h = p1[1] - p2[1]
+function getDistance(p1: SVGPoint, p2: SVGPoint) {
+    const w = p1.x - p2.x
+    const h = p1.x - p2.y
     return Math.sqrt( w * w + h * h )
 }
 
-// 兼容多个空格分隔 TODO: el.points实现
 function getPolylineLength(el: SVGPolylineElement) {
-    const points = getAttribute(el, 'points').split(' ')
+    const points = [ ...el.points ]
     const len = points.length
     return points.reduce((l, point, i) => {
         if (i === len - 1) return l + 0
-        const next = point[i + 1]
-        const p1 = point.split(',').map(d => +d)
-        const p2 = next.split(',').map(d => +d)
-        return l + getDistance(p1 as Point, p2 as Point)
+        const next = points[i + 1]
+        return l + getDistance(point, next)
     }, 0)
 }
 
 function getPolygonLength(el: SVGPolygonElement) {
-
+    const points = [ ...el.points ]
+    return getPolylineLength(el) + getDistance(points[0], points[ points.length - 1 ])
 }
 
 // get total length of path(path, cirlce, rect, line, polyline, polygon)
@@ -150,6 +145,5 @@ export function getTotalLength(el: any) {
         case 'line': getLineLength(el)
         case 'polyline': getPolylineLength(el)
         case 'polygon': getPolygonLength(el)
-        // TODO: throw error
     }
 }

@@ -9,7 +9,8 @@ import {
     getTransforms,
     isObj,
     isSvg,
-    getAttribute
+    getAttribute,
+    getTotalLength
 } from './utils'
 
 interface AnimationOpts {
@@ -165,7 +166,7 @@ function getSvgInfo(el: SVGPathElement) {
     const svg = getParentSvg(el)
     const { width, height } = svg.getBoundingClientRect()
     const viewBoxAttr = getAttribute(svg, 'viewBox')
-    const viewBox = (svg as any).viewBox || ( viewBoxAttr && viewBoxAttr.split(' ') || [ 0, 0, width, height ] )
+    const viewBox = viewBoxAttr && viewBoxAttr.split(' ').map(n => +n) || [ 0, 0, width, height ]
 
     return {
         el: svg,
@@ -200,11 +201,8 @@ function getSvgInfo(el: SVGPathElement) {
 // TODO: loop hook 有问题
 // TODO: 添加progress属性
 // TODO: 变更值的类型 svgpath等类型
-
-// progress 是否有可能小于100
-// progress 反向
-// change应该是单趟
-// loop可能是正反两趟
+// TODO: 是否限制path路径的元素类型
+// TODO: 添加progress进度：是否可以小于100，反向
 
 // Axi = animation + ... + animation
 // animation = tween + ... + tween
@@ -243,7 +241,10 @@ class Axi {
             + Math.max(...this.animations.map(d => d.delay)) 
             + Math.max(...this.animations.map(d => d.endDelay))
 
-        if (this.animationOpts.autoPlay) this.newLoop()
+        if (this.animationOpts.autoPlay) {
+            this.newLoop()
+            this.paused = false
+        }
     }
 
     private setAnimationKeys(opts: Options) {
@@ -301,9 +302,9 @@ class Axi {
                         duration: this.animationOpts.duration,
                         value: this.options[ prop ] /* value of tweens */
                     }
-                    const propValue = this.options[ prop ]
-                    if (typeof propValue === 'object') {
-                        opts = updateObjectProps(opts, propValue)
+                    const propVal = this.options[ prop ]
+                    if (typeof propVal === 'object' && !isPathVal(propVal)) { // reset specific animation opts.exp: { value: 360, duration: 1800, easing: 'easeInOutSine' }
+                        opts = updateObjectProps(opts, propVal)
                     }
                     opts.easing = parseEasing(opts.easing)
                     const tweens = this.parseTweens( target, type, opts )
@@ -454,14 +455,13 @@ class Axi {
     }
 
     // get path of animation
-    // TODO: type
-    public getAxiPath(el: string | SVGPathElement) {
+    static getAxiPath(el: string | SVGPathElement) {
         const path: SVGPathElement = typeof el === 'string' ? document.querySelector(el) : el
         return (prop: string) => ({
             prop,
             el: path,
             svg: getSvgInfo(path),
-            totalLength: path.getTotalLength() // TODO: 兼容其他元素和比例
+            totalLength: getTotalLength(path)
         } as PathTweenVal)
     }
 }

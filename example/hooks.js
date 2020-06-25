@@ -3,7 +3,7 @@ addSectionTitle('HOOKS')
 addDemos([
     { cls: 'axi-start-end', title: 'AXI START/END', count: 1, extra: '<div class="start-hook-status">Axi start: false</div><div class="end-hook-status">Axi end: false</div>' },
     { cls: 'loop-start-end', title: 'LOOP START/END', count: 1, extra: '<div class="loop-start-status">loop start: 0</div><div class="loop-end-status">loop end: 0</div>' },
-    { cls: 'update-start-end', title: 'UPDATE START/END', count: 1, extra: '<div class="update-start-status">loop start: 0</div><div class="update-end-status">loop end: 0</div>' },
+    { cls: 'update-start-end', title: 'UPDATE START/END', count: 1, extra: '<div class="update-start-status">update start: 0</div><div class="update-end-status">update end: 0</div>' },
 ])
 
 var box = ' .box:not(.shadow)'

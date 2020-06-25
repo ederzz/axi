@@ -1,3 +1,7 @@
+:root {
+    --font_color: rgb(246, 244, 242);
+}
+
 body {
     background-color: #252423;
 }
@@ -8,7 +12,7 @@ body {
 }
 h2 {
     font-size: 14px;
-    color: rgb(246, 244, 242);
+    color: var(--font_color);
     font-weight: 400;
     margin: 0 20px;
     padding-top: 20px;
@@ -22,6 +26,7 @@ h2 {
     flex-direction: column;
     justify-content: center;
     padding: 20px 0;
+    color: var(--font_color);
 }
 .line {
     position: relative;
