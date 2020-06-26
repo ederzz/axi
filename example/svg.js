@@ -4,16 +4,7 @@ const svgEl = `
     </svg>
 `
 
-addSectionTitle('SVG')
-
-addDemos([
-    { cls: 'motion-path', title: 'MOTION-PATH', count: 1, extra: svgEl, color: 'rgb(132, 83, 227)' },
-])
-
-const path = Axi.getMotionPath('path')
-var box = ' .box:not(.shadow)'
-
-new Axi({
+const motionPathCode = `new Axi({
     target: '.motion-path' + box,
     translateX: path('x'),
     translateY: path('y'),
@@ -21,4 +12,15 @@ new Axi({
     easing: 'linear',
     duration: 2000,
     loop: true
-})
+})`
+
+addDemos(
+    { id: 'targets', title: 'TARGETS', color: 'purple' },
+    [
+        { id: 'motionPath', cls: 'motion-path', title: 'MOTION-PATH', count: 1, extra: svgEl, color: 'rgb(132, 83, 227)', code: motionPathCode },
+    ]
+)
+
+const path = Axi.getMotionPath('path')
+var box = ' .box:not(.shadow)'
+eval(motionPathCode)

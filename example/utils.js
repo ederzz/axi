@@ -1,8 +1,26 @@
 const body = document.querySelector('body')
 
-function newAxiDemoEl({ cls, title, count, renderLines, click = () => {}, extra, color = 'rgb(255, 75, 75)' }) {
+function addNavLinks(links) {
+    links.forEach((d, i) => {
+        const navlinkDiv = document.createElement('div')
+        const navlink = document.createElement('a')
+        navlink.id = '#' + d.id
+        navlink.innerText = d.title
+        if (i > 0) navlinkDiv.classList.add('sub-link')
+        navlinkDiv.appendChild(navlink)
+        navSection.appendChild(navlinkDiv)
+    })
+}
+
+function newAxiDemo({ id, code, cls, title, count, renderLines, color, extra }) {
     const div = document.createElement('div')
-    div.addEventListener('click', click)
+    div.addEventListener('click', () => {
+        renderCodeExp({
+            id,
+            code
+        })
+    })
+
     div.classList.add('demo')
     div.classList.add(cls)
     const content = `
@@ -13,8 +31,8 @@ function newAxiDemoEl({ cls, title, count, renderLines, click = () => {}, extra,
                     ? renderLines()
                     : (new Array(count)).fill(1).map(() => `
                         <div class="line">
-                            <div style="background: ${ color };opacity: .2;" class="box shadow"></div>
-                            <div style="background: ${ color };" class="box"></div>
+                            <div style="opacity: .2;" class="${ color } box shadow"></div>
+                            <div class="${ color } box"></div>
                         </div>
                     `).join('')
             }
@@ -27,18 +45,33 @@ function newAxiDemoEl({ cls, title, count, renderLines, click = () => {}, extra,
         extraDiv.innerHTML = extra
         div.querySelector('.animations').appendChild(extraDiv)
     }
-    return div
+    demoSection.appendChild(div)
 }
 
-function addSectionTitle(txt) {
-    const title = document.createElement('div')
-    title.innerHTML = txt
-    body.appendChild(title)
+function renderCodeExp({ id, code }) {
+    const codeWrapper = document.createElement('div')
+    const codeCls = `${id}-code-exp`
+    codeWrapper.classList.add(codeCls)
+    const preEl = document.createElement('pre')
+    const codeEl = document.createElement('code')
+    codeEl.innerText = code
+    codeWrapper.appendChild(preEl)
+    preEl.appendChild(codeEl)
+    hljs.highlightBlock(codeEl)
+
+    codeExpSection.innerHTML = ''
+    codeExpSection.appendChild(codeWrapper)
 }
 
-function addDemos(optsAry) {
+function addDemos(cate, optsAry) {
+    addNavLinks([
+        cate,
+        ...optsAry.map(d => ({
+            id: d.id,
+            title: d.title
+        }))
+    ])
     optsAry.forEach(opts => {
-        const el = newAxiDemoEl(opts)
-        body.appendChild(el)
+        newAxiDemo({ ...opts, color: cate.color || 'red' })
     })
 }

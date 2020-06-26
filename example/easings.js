@@ -1,5 +1,3 @@
-addSectionTitle('EASINGS')
-
 const easingNames = [
     'easeInQuad',
     'easeInCubic',
@@ -38,14 +36,11 @@ function renderLines() {
     `).join('')
 }
 
-addDemos([
-    { cls: 'penner-funcs', title: 'PENNER\'S FUNCTIONS', renderLines }
-])
-
+const pennerFuncsCode = `
 easingNames.forEach((easing, i) => {
     var box = ' .box:not(.shadow)'
     new Axi({
-        target: '.penner-funcs' + ` .line-${ i }` + box,
+        target: '.penner-funcs' + \` .line-\${ i }\` + box,
         translateX: 250,
         direction: 'alternate',
         loop: true,
@@ -55,4 +50,15 @@ easingNames.forEach((easing, i) => {
         easing: easing
     })
 })
+`
+
+addDemos(
+    { id: 'targets', title: 'TARGETS', color: 'orange' },
+    [
+        { cls: 'penner-funcs', code: pennerFuncsCode, title: 'PENNER\'S FUNCTIONS', renderLines }
+    ]
+)
+
+eval(pennerFuncsCode)
+
 

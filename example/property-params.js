@@ -1,10 +1,4 @@
-addSectionTitle('PROPERTY-PARAMS')
-
-addDemos([
-    { cls: 'spec-prop-params', title: 'SPECIFIC PROPERTY PARAMETERS', count: 1 }
-])
-
-var box = ' .box:not(.shadow)'
+const specPropParamsCode = `
 new Axi({
     target: '.spec-prop-params' + box,
     translateX: {
@@ -24,3 +18,14 @@ new Axi({
     },
     delay: 250
 })
+`
+
+addDemos(
+    { id: 'targets', title: 'TARGETS', color: 'yellow' },
+    [
+        { id: 'specPropParams', code: specPropParamsCode, cls: 'spec-prop-params', title: 'SPECIFIC PROPERTY PARAMETERS', count: 1 }
+    ]
+)
+
+var box = ' .box:not(.shadow)'
+eval(specPropParamsCode)

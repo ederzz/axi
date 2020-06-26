@@ -5,9 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./code-example.css">
 </head>
 <body>
-    <h1>Inspired by <a href="https://github.com/juliangarnier/anime">anime</a>.</h1>
+    <div class="main">
+        <section class="nav">
+            <div class="logo">
+                <h2>Axi</h2>
+                <!-- <small>Inspired by <a href="https://github.com/juliangarnier/anime">anime</a>.</small> -->
+            </div>
+        </section>
+        <section class="demo-collection">
+            <h2 class="category">TARGETS</h2>
+        </section>
+        <section class="code-example">
+            <h2 class="demo-title">MOTION PATH</h2>
+            <div class="content">
+                <h3>CODE EXAMPLE</h3>
+                <div class="code"></div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const navSection = document.querySelector('.nav')
+        const demoSection = document.querySelector('.demo-collection')
+        const codeExpSection = document.querySelector('.code-example .content .code')
+    </script>
+
+    <script src="./highlight.pack.js"></script>
     <script src="../lib/axi.umd.js"></script>
     <script src="./utils.js"></script>
     <script src="./svg.js"></script>
