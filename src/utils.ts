@@ -147,3 +147,28 @@ export function getTotalLength(el: any) {
         case 'polygon': getPolygonLength(el)
     }
 }
+
+const motionPathNodeTypes = [ 'path', 'circle', 'rect', 'line', 'polyline', 'polygon' ]
+const wrongMotionPathNode = 'The motion path node can only be one of (path, circle, rect, line, polyline, polygon).'
+
+export function selectMotionPathNode(el: string | SVGElement) {
+    if (typeof el === 'string') {
+        const nodes = document.querySelectorAll(el)
+        for (const n of nodes) {
+            if (isMotionPathNode(n)) {
+                return n as SVGElement
+            }
+        }
+        throw new Error(wrongMotionPathNode)
+    } else {
+        if (isMotionPathNode(el)) {
+            return el as SVGElement
+        }
+        throw new Error(wrongMotionPathNode)
+    }
+}
+
+export function isMotionPathNode(el: Element) {
+    const n = el.tagName.toLowerCase() 
+    return motionPathNodeTypes.includes(n)
+}

@@ -10,7 +10,7 @@ addDemos([
     { cls: 'motion-path', title: 'MOTION-PATH', count: 1, extra: svgEl, color: 'rgb(132, 83, 227)' },
 ])
 
-const path = Axi.getAxiPath('path')
+const path = Axi.getMotionPath('path')
 var box = ' .box:not(.shadow)'
 
 new Axi({

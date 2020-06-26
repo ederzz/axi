@@ -10,7 +10,8 @@ import {
     isObj,
     isSvg,
     getAttribute,
-    getTotalLength
+    getTotalLength,
+    selectMotionPathNode
 } from './utils'
 
 interface AnimationOpts {
@@ -41,7 +42,7 @@ type DelayFunc = (el: any, idx: number, len: number) => number
 type IDelay = number | DelayFunc
 type ITarget = string | HTMLElement | (string | HTMLElement)[]
 type animationType = 'css' | 'attribute' | 'transform' | 'object'
-type Ivalue = number | number[] | string | string[] | PathTweenVal | PathTweenVal[] // TODO: path object
+type Ivalue = number | number[] | string | string[] | PathTweenVal | PathTweenVal[] 
 type IDirection = 'alternate' | 'reverse' | 'normal'
 
 interface TweenValue {
@@ -73,8 +74,8 @@ interface IAnimation {
     easing: (t: number) => number,
     tweens: ITween[]
 }
-// TODO: 
-function getParentSvg(el: SVGPathElement) {
+
+function getParentSvg(el: SVGElement) {
     let parent = el.parentNode
     while (!isSvg(parent)) {
         parent = parent.parentNode
@@ -151,18 +152,18 @@ function getPoint(el: SVGPathElement, curLen: number) {
 
 function getPathProgressVal(value: PathTweenVal, progress: number) {
     const { prop, el, svg, totalLength } = value
-    const len = totalLength * progress // TODO: round
+    const len = totalLength * progress
     const current = getPoint( el, len )
     const prev = getPoint( el, len - 1 )
     const next = getPoint( el, len + 1 )
     switch (prop) {
         case 'x': return current.x - svg.x
         case 'y': return current.y - svg.y
-        case 'angle': return Math.atan2(next.y - prev.y, next.x - prev.x) * 180 / Math.PI // TODO: math
+        case 'angle': return Math.atan2(next.y - prev.y, next.x - prev.x) * 180 / Math.PI
     }
 }
 
-function getSvgInfo(el: SVGPathElement) {
+function getSvgInfo(el: SVGElement) {
     const svg = getParentSvg(el)
     const { width, height } = svg.getBoundingClientRect()
     const viewBoxAttr = getAttribute(svg, 'viewBox')
@@ -172,37 +173,10 @@ function getSvgInfo(el: SVGPathElement) {
         el: svg,
         x: viewBox[0],
         y: viewBox[1],
-        xScale: width / viewBox[2], // 0 value TODO:
+        xScale: width / viewBox[2], 
         yScale: height / viewBox[3],
     }
 }
-
-// TODO: 所有的缓动参数
-// TODO: 所有可以更新的属性
-// TODO: 要执行的所有动画
-// TODO: getHooks
-// TODO: 处理查找元素 setAnimationEles
-// TODO: 命名
-// TODO: 整理其他的参数 keyframes svg ...
-// TODO: 添加注释和ts类型
-// TODO: 颜色值特殊处理
-// TODO: 解析单位和数字
-// TODO: endDelay的作用
-// TODO: 缓动函数调整
-// TODO: 多段式动画
-// TODO: 对比测试
-// TODO: 性能测试
-// TODO: transform 处理不到位
-// TODO: 测试object
-// TODO: tween start delay 
-// TODO: 离开页面后恢复
-// TODO: 提供vue/react使用
-// TODO: 验证私有属性
-// TODO: loop hook 有问题
-// TODO: 添加progress属性
-// TODO: 变更值的类型 svgpath等类型
-// TODO: 是否限制path路径的元素类型
-// TODO: 添加progress进度：是否可以小于100，反向
 
 // Axi = animation + ... + animation
 // animation = tween + ... + tween
@@ -431,7 +405,7 @@ class Axi {
         this.execute()
     }
 
-    public seek(p: number) { // seek会触发生命周期吗 TODO:
+    public seek(p: number) { 
         const progressT = p * this.duration
         this.execAnimations(this.reversed ? this.duration - progressT : progressT)
     }
@@ -455,8 +429,9 @@ class Axi {
     }
 
     // get path of animation
-    static getAxiPath(el: string | SVGPathElement) {
-        const path: SVGPathElement = typeof el === 'string' ? document.querySelector(el) : el
+    static getMotionPath(el: string | SVGPathElement) {
+        const path: SVGElement = selectMotionPathNode(el)
+         
         return (prop: string) => ({
             prop,
             el: path,

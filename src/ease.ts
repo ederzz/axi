@@ -12,8 +12,6 @@ type EasingGenerator = (a?: number, b?: number) => Easing
 const c1 = 1.70158
 const c3 = c1 + 1
 
-// TODO: expo和back函数
-
 // t: [0, 1] 
 const eases: IEases = {
     Sine: () => (t: number) => 1 - Math.cos(t * Math.PI / 2), // 正弦曲线缓动
