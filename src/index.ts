@@ -193,7 +193,7 @@ class Axi {
 
     private startTime: number
     private curTime: number = 0
-    private lastTime: number = 0
+    private lastTime: number = 0 // record progress at pause.
 
     private duration: number = 0 // delay + endDelay + duration : duration of Axi
     private paused: boolean = true
@@ -397,6 +397,7 @@ class Axi {
         this.paused = false
         this.startTime = 0
         this.curTime = 0
+        this.lastTime = 0
 
         this.axiStarted = true
         this.axiEnded = false

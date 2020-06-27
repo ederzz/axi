@@ -36,7 +36,36 @@ function renderLines() {
     `).join('')
 }
 
-const pennerFuncsCode = `
+const pennerFuncsCode = `const easingNames = [
+    'easeInQuad',
+    'easeInCubic',
+    'easeInQuart',
+    'easeInQuint',
+    'easeInSine',
+    'easeInExpo',
+    'easeInCircle',
+    'easeInBack',
+    'easeInBounce',
+    'easeInOutQuad',
+    'easeInOutCubic',
+    'easeInOutQuart',
+    'easeInOutQuint',
+    'easeInOutSine',
+    'easeInOutExpo',
+    'easeInOutCircle',
+    'easeInOutBack',
+    'easeInOutBounce',
+    'easeOutQuad',
+    'easeOutCubic',
+    'easeOutQuart',
+    'easeOutQuint',
+    'easeOutSine',
+    'easeOutExpo',
+    'easeOutCircle',
+    'easeOutBack',
+    'easeOutBounce'
+]
+
 easingNames.forEach((easing, i) => {
     var box = ' .box:not(.shadow)'
     new Axi({
