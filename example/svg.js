@@ -14,13 +14,40 @@ const motionPathCode = `new Axi({
     loop: true
 })`
 
+let motionPathAxi
+
 addDemos(
-    { id: 'targets', title: 'TARGETS', color: 'purple' },
+    { id: 'svg', title: 'SVG', color: 'purple' },
     [
-        { id: 'motionPath', cls: 'motion-path', title: 'MOTION-PATH', count: 1, extra: svgEl, color: 'rgb(132, 83, 227)', code: motionPathCode },
+        { 
+            id: 'motionPath', 
+            cls: 'motion-path', 
+            title: 'MOTION-PATH', 
+            count: 1, 
+            extra: svgEl, 
+            color: 'rgb(132, 83, 227)', 
+            code: motionPathCode, 
+            click() {
+                if (motionPathAxi) {
+                    resetRunningDemo(motionPathAxi)
+                    motionPathAxi.restart()
+                    return
+                }
+
+                const path = Axi.getMotionPath('path')
+                var box = ' .box:not(.shadow)'
+
+                motionPathAxi = new Axi({
+                    target: '.motion-path' + box,
+                    translateX: path('x'),
+                    translateY: path('y'),
+                    rotate: path('angle'),
+                    easing: 'linear',
+                    duration: 2000,
+                    loop: true,
+                })
+                resetRunningDemo(motionPathAxi)
+            } 
+        },
     ]
 )
-
-const path = Axi.getMotionPath('path')
-var box = ' .box:not(.shadow)'
-eval(motionPathCode)

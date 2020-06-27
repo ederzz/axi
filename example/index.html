@@ -9,28 +9,51 @@
 </head>
 <body>
     <div class="main">
-        <section class="nav">
+        <header class="header">
             <div class="logo">
                 <h2>Axi</h2>
                 <!-- <small>Inspired by <a href="https://github.com/juliangarnier/anime">anime</a>.</small> -->
             </div>
-        </section>
-        <section class="demo-collection">
             <h2 class="category">TARGETS</h2>
-        </section>
-        <section class="code-example">
             <h2 class="demo-title">MOTION PATH</h2>
-            <div class="content">
-                <h3>CODE EXAMPLE</h3>
-                <div class="code"></div>
-            </div>
-        </section>
+        </header>
+        <div class="header-ph"></div>
+        <article>
+            <section class="nav">
+            </section>
+            <section class="demo-collection">
+            </section>
+            <section class="code-example">
+                <div class="content">
+                    <h3>CODE EXAMPLE</h3>
+                    <div class="code"></div>
+                </div>
+            </section>
+        </article>
     </div>
 
     <script>
         const navSection = document.querySelector('.nav')
         const demoSection = document.querySelector('.demo-collection')
         const codeExpSection = document.querySelector('.code-example .content .code')
+        const demoTitle = document.querySelector('.header .demo-title')
+
+        let runningAxiDemo
+
+        function resetRunningDemo(newDemo) {
+            if (runningAxiDemo) {
+                if (Array.isArray(runningAxiDemo)) {
+                    runningAxiDemo.forEach(d => {
+                        d.pause()
+                        d.seek(0)
+                    })
+                } else {
+                    runningAxiDemo.pause()
+                    runningAxiDemo.seek(0)
+                }
+            }
+            runningAxiDemo = newDemo
+        }
     </script>
 
     <script src="./highlight.pack.js"></script>

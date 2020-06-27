@@ -6,13 +6,32 @@ const cssTransformsCode = `new Axi({
 })
 `
 
+var box = ' .box:not(.shadow)'
+let cssTransformsAxi
+
 addDemos(
-    { id: 'targets', title: 'TARGETS', color: 'orange' },
+    { id: 'properties', title: 'PROPERTIES', color: 'orange' },
     [
-        { cls: 'css-transforms', title: 'CSS TRANSFORMS', count: 1, code: cssTransformsCode }
+        { 
+            cls: 'css-transforms', 
+            title: 'CSS TRANSFORMS', 
+            count: 1, 
+            code: cssTransformsCode,
+            click() {
+                if (cssTransformsAxi) {
+                    resetRunningDemo(cssTransformsAxi)
+                    cssTransformsAxi.restart()
+                    return
+                }
+
+                cssTransformsAxi = new Axi({
+                    target: '.css-transforms' + box,
+                    translateX: 250,
+                    scale: 2,
+                    rotate: '1turn'
+                })
+                resetRunningDemo(cssTransformsAxi)
+            }
+        }
     ]
 )
-
-var box = ' .box:not(.shadow)'
-
-eval(cssTransformsCode)

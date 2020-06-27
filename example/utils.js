@@ -4,7 +4,7 @@ function addNavLinks(links) {
     links.forEach((d, i) => {
         const navlinkDiv = document.createElement('div')
         const navlink = document.createElement('a')
-        navlink.id = '#' + d.id
+        navlink.href = '#' + d.id
         navlink.innerText = d.title
         if (i > 0) navlinkDiv.classList.add('sub-link')
         navlinkDiv.appendChild(navlink)
@@ -12,13 +12,17 @@ function addNavLinks(links) {
     })
 }
 
-function newAxiDemo({ id, code, cls, title, count, renderLines, color, extra }) {
+function newAxiDemo({ id, code, cls, click = () => {}, title, count, renderLines, color, extra }) {
     const div = document.createElement('div')
+    div.id = id
     div.addEventListener('click', () => {
+        click()
         renderCodeExp({
             id,
             code
         })
+        demoTitle.innerHTML = title
+        demoTitle.className = 'demo-title ' + color
     })
 
     div.classList.add('demo')

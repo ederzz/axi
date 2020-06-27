@@ -52,13 +52,38 @@ easingNames.forEach((easing, i) => {
 })
 `
 
+let pennerFuncsAxi
+
 addDemos(
-    { id: 'targets', title: 'TARGETS', color: 'orange' },
+    { id: 'easings', title: 'EASINGS', color: 'orange' },
     [
-        { cls: 'penner-funcs', code: pennerFuncsCode, title: 'PENNER\'S FUNCTIONS', renderLines }
+        { 
+            cls: 'penner-funcs', 
+            code: pennerFuncsCode, 
+            title: 'PENNER\'S FUNCTIONS', 
+            renderLines,
+            click() {
+                if (pennerFuncsAxi) {
+                    resetRunningDemo(pennerFuncsAxi)
+                    pennerFuncsAxi.forEach(d => d.restart())
+                    return
+                }
+
+                pennerFuncsAxi = easingNames.map((easing, i) => {
+                    var box = ' .box:not(.shadow)'
+                    return new Axi({
+                        target: '.penner-funcs' + ` .line-${ i }` + box,
+                        translateX: 250,
+                        direction: 'alternate',
+                        loop: true,
+                        delay: 200,
+                        endDelay: 200,
+                        duration: 2000,
+                        easing: easing
+                    })
+                })
+                resetRunningDemo(pennerFuncsAxi)
+            }
+        }
     ]
 )
-
-eval(pennerFuncsCode)
-
-
