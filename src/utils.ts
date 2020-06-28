@@ -170,5 +170,5 @@ export function selectMotionPathNode(el: string | SVGElement) {
 
 export function isMotionPathNode(el: Element) {
     const n = el.tagName.toLowerCase() 
-    return motionPathNodeTypes.includes(n)
+    return (motionPathNodeTypes as any).includes(n)
 }

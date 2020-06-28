@@ -11,7 +11,8 @@ import {
     isSvg,
     getAttribute,
     getTotalLength,
-    selectMotionPathNode
+    selectMotionPathNode,
+    isDom
 } from './utils'
 
 interface AnimationOpts {
@@ -21,7 +22,8 @@ interface AnimationOpts {
     easing: string,
     autoPlay: boolean,
     loop: boolean,
-    direction: IDirection
+    direction: IDirection,
+    round: boolean
 }
 
 interface IHooks {
@@ -69,6 +71,7 @@ interface IAnimation {
     endDelay: number,
     prop: string, 
     duration: number,
+    round: boolean,
     value: Ivalue,
     transformCache: { [k: string]: any },
     easing: (t: number) => number,
@@ -105,7 +108,8 @@ const defaultAnimationOpts = {
     duration: 1000,
     autoPlay: true,
     loop: false,
-    direction: 'normal'
+    direction: 'normal',
+    round: false
 }
 
 const defaultHooks = {
@@ -257,11 +261,12 @@ class Axi {
     private createAnimations() {
         const animations: IAnimation[] = [].concat(
             ...this.targets.map((target, idx, ary) => {
-                const transformCache = getTransforms(target)
+                const transformCache = isDom(target) ? getTransforms(target) : {}
                 const {
                     delay,
                     endDelay,
-                    easing
+                    easing,
+                    round
                 } = this.animationOpts
                 const curDelay = typeof delay === 'number' ? delay : delay(target, idx, ary.length)
                 const curEndDelay = typeof endDelay === 'number' ? endDelay : endDelay(target, idx, ary.length)
@@ -271,6 +276,7 @@ class Axi {
                     let opts = { // options of every animation.
                         prop,
                         easing,
+                        round,
                         delay: curDelay,
                         endDelay: curEndDelay,
                         duration: this.animationOpts.duration,
@@ -356,6 +362,7 @@ class Axi {
             let newVal
             if (tween.isPath) newVal = getPathProgressVal(tween.value as PathTweenVal, eased)
             else newVal = (tween.to.number - tween.from.number) * eased + tween.from.number
+            if (item.round) newVal = Math.round(newVal)
             setProgressValue[item.type](item.target, item.prop, tween.to.unit ? newVal + tween.to.unit : newVal, item.type === 'transform' ? item.transformCache : null)
         })
     }
