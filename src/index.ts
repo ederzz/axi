@@ -205,6 +205,7 @@ class Axi {
 
     private rafId: number
     private restLoopCount: number
+    private isPausedByBrowserHidden: boolean = false
     public axiStarted = false
     public axiEnded = false
 
@@ -215,6 +216,7 @@ class Axi {
         this.setAnimationEles()
         this.setAnimationKeys(opts)
         this.createAnimations()
+        this.registerVisibilityEvent()
         this.duration = Math.max(...this.animations.map(d => d.duration)) 
             + Math.max(...this.animations.map(d => d.delay)) 
             + Math.max(...this.animations.map(d => d.endDelay))
@@ -223,6 +225,19 @@ class Axi {
             this.newLoop()
             this.paused = false
         }
+    }
+
+    private registerVisibilityEvent() {
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && !this.paused) {
+                this.isPausedByBrowserHidden = true
+                this.pause()
+            } 
+            if (!document.hidden && this.isPausedByBrowserHidden) {
+                this.isPausedByBrowserHidden = false
+                this.play()
+            }
+        })
     }
 
     private setAnimationKeys(opts: Options) {
