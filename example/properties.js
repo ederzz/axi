@@ -13,6 +13,7 @@ addDemos(
     { id: 'properties', title: 'PROPERTIES', color: 'orange' },
     [
         { 
+            id: 'cssTransforms',
             cls: 'css-transforms', 
             title: 'CSS TRANSFORMS', 
             count: 1, 

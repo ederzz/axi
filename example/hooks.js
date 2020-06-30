@@ -1,4 +1,4 @@
-const axiStartEndCode = `new Axi({
+const loopStartEndCode = `new Axi({
     target: '.loop-start-end' + box,
     loop: true,
     direction: 'alternate',
@@ -15,7 +15,7 @@ const axiStartEndCode = `new Axi({
 })
 `
 
-const loopStartEndCode = `new Axi({
+const axiStartEndCode = `new Axi({
     target: '.axi-start-end' + box,
     translateX: 250,
     axiStart() {
@@ -56,6 +56,7 @@ addDemos(
     { id: 'hooks', title: 'HOOKS', color: 'orange' },
     [
         { 
+            id: 'axiStartEnd',
             cls: 'axi-start-end', 
             code: axiStartEndCode, 
             title: 'AXI START/END', 
@@ -69,6 +70,35 @@ addDemos(
                 }
 
                 axiStartEndAxi = new Axi({
+                    target: '.axi-start-end' + box,
+                    translateX: 250,
+                    axiStart() {
+                        console.log('start a new Axi.')
+                        document.querySelector('.start-hook-status').innerHTML = 'Axi start: true'
+                    },
+                    axiEnd() {
+                        console.log('Axi end.')
+                        document.querySelector('.end-hook-status').innerHTML = 'Axi end: true'
+                    },
+                })
+                resetRunningDemo(axiStartEndAxi)
+            }
+        },
+        {
+            id: 'loopStartEnd',
+            cls: 'loop-start-end', 
+            code: loopStartEndCode, 
+            title: 'LOOP START/END', 
+            count: 1, 
+            extra: '<div class="loop-start-status">loop start: 0</div><div class="loop-end-status">loop end: 0</div>',
+            click() {
+                if (loopStartEndAxi) {
+                    resetRunningDemo(loopStartEndAxi)
+                    loopStartEndAxi.restart()
+                    return
+                }
+
+                loopStartEndAxi = new Axi({
                     target: '.loop-start-end' + box,
                     loop: true,
                     direction: 'alternate',
@@ -83,38 +113,11 @@ addDemos(
                         document.querySelector('.loop-end-status').innerHTML = 'loop end: ' + loopEndCount
                     },
                 })
-                resetRunningDemo(axiStartEndAxi)
-            }
-        },
-        { 
-            cls: 'loop-start-end', 
-            code: loopStartEndCode, 
-            title: 'LOOP START/END', 
-            count: 1, 
-            extra: '<div class="loop-start-status">loop start: 0</div><div class="loop-end-status">loop end: 0</div>',
-            click() {
-                if (loopStartEndAxi) {
-                    resetRunningDemo(loopStartEndAxi)
-                    loopStartEndAxi.restart()
-                    return
-                }
-
-                loopStartEndAxi = new Axi({
-                    target: '.axi-start-end' + box,
-                    translateX: 250,
-                    axiStart() {
-                        console.log('start a new Axi.')
-                        document.querySelector('.start-hook-status').innerHTML = 'Axi start: true'
-                    },
-                    axiEnd() {
-                        console.log('Axi end.')
-                        document.querySelector('.end-hook-status').innerHTML = 'Axi end: true'
-                    },
-                })
                 resetRunningDemo(loopStartEndAxi)
             }
         },
         { 
+            id: 'updateStartEnd',
             cls: 'update-start-end', 
             code: updateStartEndCode, 
             title: 'UPDATE START/END', 

@@ -87,6 +87,7 @@ addDemos(
     { id: 'easings', title: 'EASINGS', color: 'orange' },
     [
         { 
+            id: 'pennerFuncs',
             cls: 'penner-funcs', 
             code: pennerFuncsCode, 
             title: 'PENNER\'S FUNCTIONS', 

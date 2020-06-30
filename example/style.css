@@ -34,43 +34,43 @@ h2 {
 }
 
 .red {
-    color: var(--red);
+    color: var(--red)!important;
 }
 .orange {
-    color: var(--orange);
+    color: var(--orange)!important;
 }
 .darkyellow {
-    color: var(--darkyellow);
+    color: var(--darkyellow)!important;
 }
 .yellow {
-    color: var(--yellow);
+    color: var(--yellow)!important;
 }
 .green {
-    color: var(--green);
+    color: var(--green)!important;
 }
 .darkgreen {
-    color: var(--darkgreen);
+    color: var(--darkgreen)!important;
 }
 .darkgreen2 {
-    color: var(--darkgreen2);
+    color: var(--darkgreen2)!important;
 }
 .blue {
-    color: var(--blue);
+    color: var(--blue)!important;
 }
 .skyblue {
-    color: var(--skyblue);
+    color: var(--skyblue)!important;
 }
 .darkblue {
-    color: var(--darkblue);
+    color: var(--darkblue)!important;
 }
 .purple {
-    color: var(--purple);
+    color: var(--purple)!important;
 }
 .lightpurple {
-    color: var(--lightpurple);
+    color: var(--lightpurple)!important;
 }
 .lightpurple2 {
-    color: var(--lightpurple2);
+    color: var(--lightpurple2)!important;
 }
 
 .box.red {
@@ -129,6 +129,7 @@ h2 {
 
 article {
     border-bottom: 1px solid var(--border_cor);
+    height: calc(100vh - 61px);
 }
 
 .header-ph {
@@ -141,6 +142,10 @@ article {
 .demo-title {
     padding: 20px;
     border-bottom: 1px solid var(--border_cor);
+    /* color: var(--font_color); */
+}
+
+.logo {
     color: var(--font_color);
 }
 
@@ -153,7 +158,13 @@ article {
 
 .nav,
 .header .logo {
-    width: 15%;
+    width: 20%;
+    box-sizing: border-box;
+}
+
+.nav {
+    font-size: 14px;
+    padding: 10px;
     box-sizing: border-box;
 }
 
@@ -180,7 +191,7 @@ article {
 
 .code-example,
 .header .demo-title {
-    width: 47.5%;
+    width: 42.5%;
     box-sizing: border-box;
 }
 

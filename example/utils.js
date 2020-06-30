@@ -1,28 +1,81 @@
 const body = document.querySelector('body')
 
 function addNavLinks(links) {
+    const {
+        id: firstId,
+        code: firstDemoCode
+    } = links[1]
+
+    const {
+        color,
+    } = links[0]
+
     links.forEach((d, i) => {
         const navlinkDiv = document.createElement('div')
         const navlink = document.createElement('a')
-        navlink.href = '#' + d.id
+        const id = i === 0 ? firstId : d.id
+        navlink.href = '#' + id
         navlink.innerText = d.title
-        if (i > 0) navlinkDiv.classList.add('sub-link')
+
+        if (i > 0) {
+            navlinkDiv.classList = 'link sub-link'
+        } else {
+            navlinkDiv.classList.add('link')
+        }
+
+        let code = d.code
+        if (i === 0) code = firstDemoCode
+
+        navlink.addEventListener('click', () => {
+            if (activeDemo === id) return
+            resetActiveLink(id, firstId, color)
+            renderCodeExp({ id, code })
+        })
+            
         navlinkDiv.appendChild(navlink)
         navSection.appendChild(navlinkDiv)
     })
 }
 
-function newAxiDemo({ id, code, cls, click = () => {}, title, count, renderLines, color, extra }) {
+let activeDemo = ''
+
+function resetActiveLink(id, parentId, color) {
+    document.querySelectorAll('.link a').forEach(d => {
+        d.classList = ''
+    })
+
+    const link = document.querySelector(`.sub-link a[href='#${ id }']`)
+    link.classList = color
+    const cateLink = document.querySelector(`a[href='#${ parentId }']`)
+    cateLink.classList = color
+}
+
+function newAxiDemo({ id, cate, parentId, code, cls, click = () => {}, title, count, renderLines, extra }) {
+    const {
+        color,
+        title: cateTitle,
+    } = cate
+
     const div = document.createElement('div')
     div.id = id
     div.addEventListener('click', () => {
         click()
+
+        if (activeDemo === id) return
+
+        activeDemo = id
+        demoSection.scrollTop = div.offsetTop - 61
         renderCodeExp({
             id,
             code
         })
+
+        resetActiveLink(id, parentId, color)
+
         demoTitle.innerHTML = title
+        category.innerHTML = cateTitle
         demoTitle.className = 'demo-title ' + color
+        category.className = 'category ' + color
     })
 
     div.classList.add('demo')
@@ -70,12 +123,9 @@ function renderCodeExp({ id, code }) {
 function addDemos(cate, optsAry) {
     addNavLinks([
         cate,
-        ...optsAry.map(d => ({
-            id: d.id,
-            title: d.title
-        }))
+        ...optsAry
     ])
     optsAry.forEach(opts => {
-        newAxiDemo({ ...opts, color: cate.color || 'red' })
+        newAxiDemo({ ...opts, cate, parentId: optsAry[0].id, cateTitle: cate.title, color: cate.color || 'red' })
     })
 }
