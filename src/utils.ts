@@ -89,6 +89,19 @@ export const isSvg = (el: any): el is SVGElement => el instanceof SVGElement
 export function isDom(ele: HTMLElement) {
     return ele.nodeType || isSvg(ele)
 }
+export const isHexCor = (str: string) => /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(str)
+export const isHslCor = (str: string) => /^hsl/.test(str)
+export const isRgbCor = (str: string) => /^rgb/.test(str)
+export const isCor = (str: string) => isHexCor(str) || isHslCor(str) || isRgbCor(str)
+
+
+export const hex2rgba = (cor: string) => {
+    const fullHexCor = cor.replace(/^#([A-F\d])(A-F\d)(A-F\d)$/i, (_, r, g, b) => r + r + g + g + b + b)
+    const oxRgb = /^#([A-F\d]{2})([A-F\d]{2})([A-F\d]{2})$/i.exec(fullHexCor)
+    const [_, r, g, b] = oxRgb
+    
+    return `rgba(${ parseInt(r, 16) }, ${ parseInt(g, 16) }, ${ parseInt(b, 16) }, 1)`
+}
 
 function stringContains(str: string, text: string) {
     return str.indexOf(text) > -1
