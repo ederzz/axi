@@ -12,7 +12,9 @@ import {
     getAttribute,
     getTotalLength,
     selectMotionPathNode,
-    isDom
+    isDom,
+    isCor,
+    color2rgba
 } from './utils'
 
 interface AnimationOpts {
@@ -147,6 +149,17 @@ function decomposeValue(val: Ivalue, unit: string) {
         original: val,
         number: matchRet ? +matchRet[0] : 0,
         unit
+    }
+}
+
+function decomposeCorValue(cor: string) {
+    const original = color2rgba(cor)
+    var rgx = /[+-]?\d*\.?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g
+
+    return {
+        original,
+        number: cor.match(rgx).map(Number),
+        unit: ''
     }
 }
 
@@ -317,7 +330,18 @@ class Axi {
         this.animations = animations
     }
 
-    private parseTweens(target: HTMLElement, type: string, opts: { value: Ivalue, prop: string, delay: number, endDelay: number, easing: string, duration: number }) {
+    private parseTweens(
+        target: HTMLElement, 
+        type: string, 
+        opts: { 
+            value: Ivalue, 
+            prop: string, 
+            delay: number, 
+            endDelay: number, 
+            easing: string, 
+            duration: number 
+        }
+    ) {
         const {
             prop,
             delay,
@@ -332,16 +356,26 @@ class Axi {
         const durationPiece = duration / len
 
         return (vals as string[]).map((d: Ivalue, i: number) => {
+            const isColor = isCor(d as string)
             const fromVal = i === 0 ? oriValue : vals[ i - 1 ]
-            const from = decomposeValue(fromVal, parseUnit(fromVal) || oriUnit)
             const toVal = vals[i]
-            const to = decomposeValue(toVal, parseUnit(toVal) || oriUnit)
+            
+            let from, to
+            if (isColor) {
+                from = decomposeCorValue(d as string)
+                to = decomposeCorValue(d as string) 
+            } else {
+                from = decomposeValue(fromVal, parseUnit(fromVal) || oriUnit)
+                to = decomposeValue(toVal, parseUnit(toVal) || oriUnit)
+            }
+
             return {
                 start: (i === 0 ? delay : 0) + durationPiece * i,
                 end: delay + durationPiece * (i + 1) + (i === len - 1 ? endDelay : 0),
                 duration: durationPiece,
                 value: d,
                 isPath: isPathVal(d),
+                isColor,
                 delay,
                 from,
                 to
@@ -378,7 +412,10 @@ class Axi {
             if (tween.isPath) newVal = getPathProgressVal(tween.value as PathTweenVal, eased)
             else newVal = (tween.to.number - tween.from.number) * eased + tween.from.number
             if (item.round) newVal = Math.round(newVal)
-            setProgressValue[item.type](item.target, item.prop, tween.to.unit ? newVal + tween.to.unit : newVal, item.type === 'transform' ? item.transformCache : null)
+            if (tween.to.unit) newVal = newVal + tween.to.unit
+
+            const transforms = item.type === 'transform' ? item.transformCache : null
+            setProgressValue[item.type](item.target, item.prop, newVal, transforms)
         })
     }
 
@@ -429,8 +466,9 @@ class Axi {
     }
 
     public seek(p: number) { 
-        const progressT = p * this.duration
-        this.execAnimations(this.reversed ? this.duration - progressT : progressT)
+        let progressT = p * this.duration
+        if (this.reversed) progressT = this.duration - progressT
+        this.execAnimations(progressT)
     }
 
     public newLoop() {
