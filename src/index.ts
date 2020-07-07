@@ -14,7 +14,8 @@ import {
     selectMotionPathNode,
     isDom,
     isCor,
-    color2rgba
+    color2rgba,
+    rgbaGen
 } from './utils'
 
 interface AnimationOpts {
@@ -63,7 +64,8 @@ interface ITween {
     value: number | string | PathTweenVal,
     from: TweenValue,
     to: TweenValue,
-    isPath: boolean
+    isPath: boolean,
+    isColor: boolean
 }
 
 interface IAnimation {
@@ -154,7 +156,7 @@ function decomposeValue(val: Ivalue, unit: string) {
 
 function decomposeCorValue(cor: string) {
     const original = color2rgba(cor)
-    var rgx = /[+-]?\d*\.?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g
+    const rgx = /[+-]?\d*\.?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g
 
     return {
         original,
@@ -193,6 +195,14 @@ function getSvgInfo(el: SVGElement) {
         xScale: width / viewBox[2], 
         yScale: height / viewBox[3],
     }
+}
+
+function composeCorNewVal(from: number[], to: number[], eased: number) {
+    let ret = []
+    for (let i = 0; i < from.length; i++) {
+        ret.push((to[i] - from[i]) * eased + from[i] as any)
+    }
+    return rgbaGen(ret[0], ret[1], ret[2], ret[3])
 }
 
 // Axi = animation + ... + animation
@@ -359,7 +369,7 @@ class Axi {
             const isColor = isCor(d as string)
             const fromVal = i === 0 ? oriValue : vals[ i - 1 ]
             const toVal = vals[i]
-            
+
             let from, to
             if (isColor) {
                 from = decomposeCorValue(d as string)
@@ -409,9 +419,10 @@ class Axi {
             if (!tween) return
             const eased = item.easing(minMax(progressT - tween.delay, 0, tween.duration) / tween.duration)
             let newVal
-            if (tween.isPath) newVal = getPathProgressVal(tween.value as PathTweenVal, eased)
+            if (tween.isColor) newVal = composeCorNewVal(tween.from.number as any, tween.to.number as any, eased)
+            else if (tween.isPath) newVal = getPathProgressVal(tween.value as PathTweenVal, eased)
             else newVal = (tween.to.number - tween.from.number) * eased + tween.from.number
-            if (item.round) newVal = Math.round(newVal)
+            if (item.round && !tween.isColor) newVal = Math.round(newVal as number)
             if (tween.to.unit) newVal = newVal + tween.to.unit
 
             const transforms = item.type === 'transform' ? item.transformCache : null
