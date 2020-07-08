@@ -37,8 +37,6 @@ function addNavLinks(links) {
     })
 }
 
-let activeDemo = ''
-
 function resetActiveLink(id, parentId, color) {
     document.querySelectorAll('.link a').forEach(d => {
         d.classList = ''
@@ -50,37 +48,80 @@ function resetActiveLink(id, parentId, color) {
     cateLink.classList = color
 }
 
-function newAxiDemo({ 
-    id, 
-    cate, 
-    parentId, 
-    code, 
-    cls, 
-    spriteCls = [], 
-    linePh = [], 
-    click = () => {}, 
-    title, 
-    count, 
-    renderLines, 
-    extra 
-}) {
+function newAxiDemo(opts) {
+    const { 
+        cate, 
+        axiParams = [], 
+        extra,
+    } = opts
     const {
         color,
         title: cateTitle,
     } = cate
 
+    let axis 
+    function runAxi() {
+        if (axis) {
+            resetRunningDemo(axis)
+            axis.forEach(d => d.restart())
+            return
+        }
+
+        axis = axiParams.map(d => (
+            new Axi({
+                ...d
+            })
+        ))
+        
+        resetRunningDemo(axis)
+    }
+
+    const demo = createDemoEl(opts) 
+    bindClickEvent(demo, { ...opts, runAxi, color, cateTitle })
+    renderLinesOfDemo(demo, { ...opts, color })
+    renderExtra(demo, extra)
+    pushAxiDemo2list(demo)
+}
+
+function createDemoEl({
+    id,
+    cls
+}) {
     const div = document.createElement('div')
     div.id = id
-    div.addEventListener('click', () => {
-        click()
+    div.className = 'demo ' + cls
+    return div
+}
+
+let activeDemo = ''
+
+function bindClickEvent(demo, {
+    click,
+    runAxi,
+    id,
+    code,
+    axiParams = [],
+    color,
+    title,
+    cateTitle,
+    parentId
+}) {
+    demo.addEventListener('click', () => {
+        if (click) click()
+        else runAxi()
 
         if (activeDemo === id) return
 
         activeDemo = id
-        demoSection.scrollTop = div.offsetTop - 61
+        demoSection.scrollTop = demo.offsetTop - 61
+
+        const axiCode  = code || axiParams.map(d => `
+            new Axi(${ JSON.stringify(d) })
+        `).join('\n')
+
         renderCodeExp({
             id,
-            code
+            code: axiCode
         })
 
         resetActiveLink(id, parentId, color)
@@ -90,9 +131,17 @@ function newAxiDemo({
         demoTitle.className = 'demo-title ' + color
         category.className = 'category ' + color
     })
+}
 
-    div.classList.add('demo')
-    div.classList.add(cls)
+function renderLinesOfDemo(demo, {
+    title,
+    size,
+    count,
+    renderLines,
+    color,
+    spriteCls = [],
+    linePh = [],
+}) {
     const content = `
         <h2>${ title }</h2>
         <div class="animations">
@@ -100,24 +149,29 @@ function newAxiDemo({
                 renderLines
                     ? renderLines()
                     : (new Array(count)).fill(1).map((_, i) => `
-                        <div class="line">
+                        <div class="line ${ size }">
                             <div style="opacity: .2;" class="${ color } box shadow"></div>
-                            <div class="${ color } ${ spriteCls[i] || '' } box"></div>
+                            <div class="${ color } ${ spriteCls[i] || '' } box sprite"></div>
                             <div style="opacity: .2;margin-left: 35px;line-height: 28px;" class="ph ${ color }">${ linePh[i] || '' }</div>
                         </div>
                     `).join('')
             }
         </div> 
     `
+    demo.innerHTML = content
+}
 
-    div.innerHTML = content
+function renderExtra(demo, extra) {
     if (extra) {
         const extraDiv = document.createElement('div')
         extraDiv.classList.add('extra')
         extraDiv.innerHTML = extra
-        div.querySelector('.animations').appendChild(extraDiv)
+        demo.querySelector('.animations').appendChild(extraDiv)
     }
-    demoSection.appendChild(div)
+}
+
+function pushAxiDemo2list(d) {
+    demoSection.appendChild(d)
 }
 
 function renderCodeExp({ id, code }) {

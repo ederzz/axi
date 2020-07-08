@@ -147,6 +147,9 @@ article {
     height: 28px;
 }
 .line.small {
+    height: 18px;
+}
+.strip .line {
     height: 2px;
 }
 .line:not(:last-child) {
@@ -159,10 +162,16 @@ article {
     height: 28px;
     left: 0;
 }
-.box.small {
+.line.small .box {
+    width: 18px;
+    height: 18px;
+}
+
+.strip .line .box {
     height: 2px;
     margin: 1px 0;
 }
+
 .shadow {
     opacity: .2;
 }

@@ -38,7 +38,7 @@ addDemos(
                 var box = ' .box:not(.shadow)'
 
                 motionPathAxi = new Axi({
-                    target: '.motion-path' + box,
+                    target: '.motion-path .sprite',
                     translateX: path('x'),
                     translateY: path('y'),
                     rotate: path('angle'),
