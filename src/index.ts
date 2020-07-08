@@ -160,7 +160,7 @@ function decomposeCorValue(cor: string) {
 
     return {
         original,
-        number: cor.match(rgx).map(Number),
+        number: original.match(rgx).map(Number),
         unit: ''
     }
 }
@@ -372,7 +372,7 @@ class Axi {
 
             let from, to
             if (isColor) {
-                from = decomposeCorValue(d as string)
+                from = decomposeCorValue(fromVal as string)
                 to = decomposeCorValue(d as string) 
             } else {
                 from = decomposeValue(fromVal, parseUnit(fromVal) || oriUnit)

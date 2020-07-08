@@ -6,7 +6,8 @@ export function parseUnit(val: string | number | object) {
 
 export function getCssValue(ele: HTMLElement, prop: string) {
     if (prop in ele.style) {
-        const val = ele.style[prop as any] || getComputedStyle(ele).getPropertyValue(prop) || '0'
+        const cssProp = prop.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
+        const val = ele.style[prop as any] || getComputedStyle(ele).getPropertyValue(cssProp) || '0'
         return val
     }
     return '0'
@@ -97,8 +98,8 @@ export const isCor = (str: string) => isHexCor(str) || isHslCor(str) || isRgbCor
 export const rgbaGen = (r: number, g: number, b: number, a: any) => `rgba(${ r }, ${ g }, ${ b }, ${ a })`
 
 export const hex2rgba = (cor: string) => {
-    const fullHexCor = cor.replace(/^#([A-F\d])(A-F\d)(A-F\d)$/i, (_, r, g, b) => r + r + g + g + b + b)
-    const oxRgb = /^#([A-F\d]{2})([A-F\d]{2})([A-F\d]{2})$/i.exec(fullHexCor)
+    const fullHexCor = cor.replace(/^#([A-F\d])([A-F\d])([A-F\d])$/i, (_, r, g, b) => r + r + g + g + b + b)
+    const oxRgb = /^#?([A-F\d]{2})([A-F\d]{2})([A-F\d]{2})$/i.exec(fullHexCor)
     const [_, r, g, b] = oxRgb
     return rgbaGen( parseInt(r, 16), parseInt(g, 16), parseInt(b, 16), 1 )
 }
@@ -144,7 +145,7 @@ export const color2rgba = (cor: string) => {
     if (isHexCor(cor)) return hex2rgba(cor)
     if (isHslCor(cor)) return hsl2rgba(cor)
     if (isRgbCor(cor)) return rgb2rgba(cor)
-    return new Error('Please set the correct color(rgb, rgba, hex, hsl).')
+    throw new Error('Please set the correct color(rgb, rgba, hex, hsl).')
 }
 
 function stringContains(str: string, text: string) {

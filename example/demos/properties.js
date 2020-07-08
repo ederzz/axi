@@ -60,7 +60,7 @@ addDemos(
                     target: '.css-properties' + box,
                     left: '240px',
                     backgroundColor: '#FFF',
-                    borderRadius: ['0%', '50%'],
+                    borderRadius: ['50%'],
                     easing: 'easeInOutQuad'
                 })
                 resetRunningDemo(cssPropertiesAxi)

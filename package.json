@@ -12,7 +12,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npx rollup -c",
-    "watch": "npx rollup -cw"
+    "watch": "rollup -cw"
   },
   "repository": {
     "type": "git",
@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/shenyiling/axi#readme",
   "devDependencies": {
+    "rollup": "^2.21.0",
     "rollup-plugin-typescript2": "^0.27.1",
     "typescript": "^3.9.3"
   }
