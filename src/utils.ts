@@ -230,3 +230,19 @@ export function isMotionPathNode(el: Element) {
     const n = el.tagName.toLowerCase() 
     return (motionPathNodeTypes as any).includes(n)
 }
+
+export const requestAnimFrame = window.requestAnimationFrame ||
+    window.webkitRequestAnimationFrame ||
+    (window as any).mozRequestAnimationFrame ||
+    (window as any).oRequestAnimationFrame ||
+    (window as any).msRequestAnimationFrame ||
+    function (cb: any) {
+        return window.setTimeout(cb, 1000 / 60);
+    }
+
+export const cancelRequestAnimFrame = window.cancelAnimationFrame ||
+    (window as any).webkitCancelRequestAnimationFrame ||
+    (window as any).mozCancelRequestAnimationFrame ||
+    (window as any).oCancelRequestAnimationFrame ||
+    (window as any).msCancelRequestAnimationFrame ||
+    window.clearTimeout

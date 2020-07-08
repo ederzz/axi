@@ -15,7 +15,9 @@ import {
     isDom,
     isCor,
     color2rgba,
-    rgbaGen
+    rgbaGen,
+    requestAnimFrame,
+    cancelRequestAnimFrame
 } from './utils'
 
 interface AnimationOpts {
@@ -406,7 +408,7 @@ class Axi {
     }
 
     private execute() { // 执行动画
-        this.rafId = requestAnimationFrame(this.animationStep.bind(this))
+        this.rafId = requestAnimFrame(this.animationStep.bind(this))
     }
 
     private animationStep(t: number) {
@@ -463,7 +465,7 @@ class Axi {
     // ===== control ======
     public pause() {
         if (this.paused) return
-        cancelAnimationFrame(this.rafId)
+        cancelRequestAnimFrame(this.rafId)
         this.paused = true
         this.startTime = 0
         this.lastTime = this.curTime
