@@ -38,7 +38,7 @@ let specPropParamsAxi
 let functionBasedParamsAxi
 
 addDemos(
-    { id: 'propertyParams', title: 'PROPERTY-PARAMS', color: 'yellow' },
+    { id: 'propertyParams', title: 'PROPERTY-PARAMS', color: 'darkyellow' },
     [
         { 
             id: 'specPropParams', 
@@ -89,7 +89,6 @@ addDemos(
                     return
                 }
 
-                // TODO: bug
                 functionBasedParamsAxi = new Axi({
                     target: '.function-base-params' + box,
                     translateX: 270,

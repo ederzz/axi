@@ -300,8 +300,8 @@ class Axi {
             direction,
             loop
         } = this.animationOpts
-        this.restLoopCount = loop ? -1 : ( direction === 'alternate' ? 2 : 1 )
-        console.log(this.restLoopCount, '数量')
+        if (typeof loop === 'number') this.restLoopCount = loop
+        else this.restLoopCount = loop ? -1 : ( direction === 'alternate' ? 2 : 1 )
     }
     
     private setHooks(opts: Options) {
