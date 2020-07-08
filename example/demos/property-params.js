@@ -20,8 +20,22 @@ new Axi({
 })
 `
 
+const functionBasedParamsCode = `new Axi({
+    target: '.function-base-params' + box,
+    translateX: 270,
+    direction: 'alternate',
+    loop: true,
+    delay: function(_, i) {
+        return i * 100
+    },
+    endDelay: function(el, i, l) {
+        return (l - i) * 100
+    }
+}`
+
 var box = ' .box:not(.shadow)'
 let specPropParamsAxi
+let functionBasedParamsAxi
 
 addDemos(
     { id: 'propertyParams', title: 'PROPERTY-PARAMS', color: 'yellow' },
@@ -60,6 +74,36 @@ addDemos(
                 })
                 resetRunningDemo(specPropParamsAxi)
             }
-        }
+        },
+        { 
+            id: 'functionBasedParams', 
+            code: functionBasedParamsCode, 
+            cls: 'function-base-params', 
+            title: 'FUNCTION BASED PARAMS',
+            linePh: [ 'delay = 0 * 100', 'delay = 1 * 100', 'delay = 2 * 100' ],
+            count: 3,
+            click() {
+                if (functionBasedParamsAxi) {
+                    resetRunningDemo(functionBasedParamsAxi)
+                    functionBasedParamsAxi.restart()
+                    return
+                }
+
+                // TODO: bug
+                functionBasedParamsAxi = new Axi({
+                    target: '.function-base-params' + box,
+                    translateX: 270,
+                    direction: 'alternate',
+                    loop: true,
+                    delay: function(_, i) {
+                        return i * 100
+                    },
+                    endDelay: function(el, i, l) {
+                        return (l - i) * 100
+                    }
+                })
+                resetRunningDemo(functionBasedParamsAxi)
+            }
+        },
     ]
 )

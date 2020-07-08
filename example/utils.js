@@ -50,7 +50,20 @@ function resetActiveLink(id, parentId, color) {
     cateLink.classList = color
 }
 
-function newAxiDemo({ id, cate, parentId, code, cls, click = () => {}, title, count, renderLines, extra }) {
+function newAxiDemo({ 
+    id, 
+    cate, 
+    parentId, 
+    code, 
+    cls, 
+    spriteCls = [], 
+    linePh = [], 
+    click = () => {}, 
+    title, 
+    count, 
+    renderLines, 
+    extra 
+}) {
     const {
         color,
         title: cateTitle,
@@ -86,15 +99,17 @@ function newAxiDemo({ id, cate, parentId, code, cls, click = () => {}, title, co
             ${
                 renderLines
                     ? renderLines()
-                    : (new Array(count)).fill(1).map(() => `
+                    : (new Array(count)).fill(1).map((_, i) => `
                         <div class="line">
                             <div style="opacity: .2;" class="${ color } box shadow"></div>
-                            <div class="${ color } box"></div>
+                            <div class="${ color } ${ spriteCls[i] || '' } box"></div>
+                            <div style="opacity: .2;margin-left: 35px;line-height: 28px;" class="ph ${ color }">${ linePh[i] || '' }</div>
                         </div>
                     `).join('')
             }
         </div> 
     `
+
     div.innerHTML = content
     if (extra) {
         const extraDiv = document.createElement('div')
@@ -126,6 +141,12 @@ function addDemos(cate, optsAry) {
         ...optsAry
     ])
     optsAry.forEach(opts => {
-        newAxiDemo({ ...opts, cate, parentId: optsAry[0].id, cateTitle: cate.title, color: cate.color || 'red' })
+        newAxiDemo({ 
+            ...opts, 
+            cate, 
+            parentId: optsAry[0].id, 
+            cateTitle: cate.title, 
+            color: cate.color || 'red' 
+        })
     })
 }
