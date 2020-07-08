@@ -501,6 +501,7 @@ class Axi {
             this.hooks.axiStart()
         }
         this.hooks.loopStart() // hook: start of loop
+        this.lastTime = 0
         this.startTime = 0
         this.curTime = 0
         this.execute()

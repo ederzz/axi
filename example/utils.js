@@ -115,8 +115,7 @@ function bindClickEvent(demo, {
         activeDemo = id
         demoSection.scrollTop = demo.offsetTop - 61
 
-        const axiCode  = code || axiParams.map(d => `
-            new Axi(${ JSON.stringify(d) })
+        const axiCode  = code || axiParams.map(d => `new Axi(${ JSON.stringify(d, null, 4) })
         `).join('\n')
 
         renderCodeExp({
