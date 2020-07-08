@@ -235,6 +235,8 @@ class Axi {
     constructor(opts: Options) {
         this.options = opts
         this.setAnimationOpts(opts) 
+        this.setReversed()
+        this.setRestLoopCount()
         this.setHooks(opts) 
         this.setAnimationEles()
         this.setAnimationKeys(opts)
@@ -284,12 +286,22 @@ class Axi {
 
     private setAnimationOpts(opts: Options) { // set animation options
         this.animationOpts = updateObjectProps(defaultAnimationOpts, opts)
+    }
+
+    private setReversed() {
+        const {
+            direction,
+        } = this.animationOpts
+        this.reversed = direction === 'reverse'
+    }
+
+    private setRestLoopCount() {
         const {
             direction,
             loop
         } = this.animationOpts
-        this.reversed = direction === 'reverse'
         this.restLoopCount = loop ? -1 : ( direction === 'alternate' ? 2 : 1 )
+        console.log(this.restLoopCount, '数量')
     }
     
     private setHooks(opts: Options) {
@@ -464,16 +476,15 @@ class Axi {
     }
 
     public restart() {
+        this.setReversed()
+        this.setRestLoopCount()
         this.paused = false
-        this.startTime = 0
-        this.curTime = 0
         this.lastTime = 0
 
-        this.axiStarted = true
+        this.axiStarted = false
         this.axiEnded = false
-        this.hooks.axiStart()
         
-        this.execute()
+        this.newLoop()
     }
 
     public seek(p: number) { 
