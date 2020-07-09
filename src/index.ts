@@ -20,10 +20,13 @@ import {
     cancelRequestAnimFrame
 } from './utils'
 
+type DurationFunc = () => number
+type IDuration = number | DurationFunc
+
 interface AnimationOpts {
     delay: IDelay,
     endDelay: IDelay,
-    duration: number,
+    duration: IDuration,
     easing: string,
     autoPlay: boolean,
     loop: boolean,
@@ -49,7 +52,8 @@ type DelayFunc = (el: any, idx: number, len: number) => number
 type IDelay = number | DelayFunc
 type ITarget = string | HTMLElement | (string | HTMLElement)[]
 type animationType = 'css' | 'attribute' | 'transform' | 'object'
-type Ivalue = number | number[] | string | string[] | PathTweenVal | PathTweenVal[] 
+type IvalueGen = (el: Element, i: number, len: number) => any
+type Ivalue = number | number[] | string | string[] | PathTweenVal | PathTweenVal[] | IvalueGen // TODO:
 type IDirection = 'alternate' | 'reverse' | 'normal'
 
 interface TweenValue {
@@ -289,6 +293,7 @@ class Axi {
 
     private setAnimationOpts(opts: Options) { // set animation options
         this.animationOpts = updateObjectProps(defaultAnimationOpts, opts)
+        if (typeof this.animationOpts.duration === 'function') this.animationOpts.duration = this.animationOpts.duration()
     }
 
     private setReversed() {
@@ -332,7 +337,7 @@ class Axi {
                         round,
                         delay: curDelay,
                         endDelay: curEndDelay,
-                        duration: this.animationOpts.duration,
+                        duration: this.animationOpts.duration as number,
                         value: this.options[ prop ] /* value of tweens */
                     }
                     const propVal = this.options[ prop ]
@@ -340,7 +345,7 @@ class Axi {
                         opts = updateObjectProps(opts, propVal)
                     }
                     opts.easing = parseEasing(opts.easing)
-                    const tweens = this.parseTweens( target, type, opts )
+                    const tweens = this.parseTweens( target, type, opts, idx, ary.length )
                     
                     return {
                         target,
@@ -365,7 +370,9 @@ class Axi {
             endDelay: number, 
             easing: string, 
             duration: number 
-        }
+        },
+        idx: number,
+        targetLen: number
     ) {
         const {
             prop,
@@ -382,8 +389,10 @@ class Axi {
 
         return (vals as string[]).map((d: Ivalue, i: number) => {
             const isColor = isCor(d as string)
-            const fromVal = i === 0 ? oriValue : vals[ i - 1 ]
-            const toVal = vals[i]
+            let fromVal = i === 0 ? oriValue : vals[ i - 1 ]
+            let toVal = vals[i]
+            if (typeof fromVal === 'function') fromVal = fromVal(target, idx, targetLen)
+            if (typeof toVal === 'function') toVal = toVal(target, idx, targetLen)
 
             let from, to
             if (isColor) {

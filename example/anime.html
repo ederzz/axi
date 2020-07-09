@@ -31,9 +31,7 @@
         var path = anime.path('.c');
         anime({
         targets: '.a',
-        translateX: path('x'),
-        translateY: path('y'),
-        rotate: path('angle'),
+        translateX: [function () { return 300 }, function () { return 500 }],
         easing: 'linear',
         duration: 2000,
         loop: true
