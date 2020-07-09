@@ -162,6 +162,9 @@ article {
     height: 28px;
     left: 0;
 }
+.box.circle {
+    border-radius: 50%;
+}
 .line.small .box {
     width: 18px;
     height: 18px;

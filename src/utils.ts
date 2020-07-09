@@ -85,7 +85,7 @@ export const setProgressValue = {
     }
 }
 
-export const isObj = (val: any) => stringContains(Object.prototype.toString.call(val), 'object')
+export const isObj = (val: any) => stringContains(Object.prototype.toString.call(val), 'Object')
 export const isSvg = (el: any): el is SVGElement => el instanceof SVGElement
 export function isDom(ele: HTMLElement) {
     return ele.nodeType || isSvg(ele)

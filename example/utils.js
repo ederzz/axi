@@ -138,6 +138,7 @@ function renderLinesOfDemo(demo, {
     count,
     renderLines,
     color,
+    shape = 'rect',
     spriteCls = [],
     linePh = [],
 }) {
@@ -149,8 +150,8 @@ function renderLinesOfDemo(demo, {
                     ? renderLines()
                     : (new Array(count)).fill(1).map((_, i) => `
                         <div class="line ${ size }">
-                            <div style="opacity: .2;" class="${ color } box shadow"></div>
-                            <div class="${ color } ${ spriteCls[i] || '' } box sprite"></div>
+                            <div style="opacity: .2;" class="${ color } ${ shape } box shadow"></div>
+                            <div class="${ color } ${ spriteCls[i] || '' } ${ shape } box sprite"></div>
                             <div style="opacity: .2;margin-left: 35px;line-height: 28px;" class="ph ${ color }">${ linePh[i] || '' }</div>
                         </div>
                     `).join('')

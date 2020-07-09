@@ -8,6 +8,7 @@ addDemos(
             cls: 'function-based-values', 
             title: 'FUNCTION BASED VALUES', 
             count: 3,
+            shape: 'circle',
             axiParams: [
                 {
                     target: '.function-based-values .sprite',
@@ -21,7 +22,7 @@ addDemos(
                         return (l - i) + .25
                     },
                     rotate: function() { return random(-360, 360) },
-                    borderRadius: function() { return ['50%', random(10, 35) + '%'] },
+                    borderRadius: function () { return random(10, 35) + '%' },
                     duration: function() { return random(1200, 1800) },
                     delay: function() { return random(0, 400) },
                     direction: 'alternate',
