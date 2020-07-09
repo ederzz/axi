@@ -35,7 +35,6 @@ addDemos(
                 }
 
                 const path = Axi.getMotionPath('path')
-                var box = ' .box:not(.shadow)'
 
                 motionPathAxi = new Axi({
                     target: '.motion-path .sprite',
