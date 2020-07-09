@@ -228,7 +228,7 @@ class Axi {
     private paused: boolean = true
     private reversed: boolean = false // reversed direction
 
-    private rafId: number
+    private rafIds: number[] = []
     private restLoopCount: number
     private isPausedByBrowserHidden: boolean = false
     public axiStarted = false
@@ -408,7 +408,8 @@ class Axi {
     }
 
     private execute() { // 执行动画
-        this.rafId = requestAnimFrame(this.animationStep.bind(this))
+        const rafId = requestAnimFrame(this.animationStep.bind(this))
+        this.rafIds.push(rafId)
     }
 
     private animationStep(t: number) {
@@ -417,7 +418,10 @@ class Axi {
         this.execAnimations(progressT)
         this.hooks.updateEnd() // hook: end of every update.
         this.checkEnding(progressT)
-        if (!this.paused) this.execute()
+        if (!this.paused) {
+            this.rafIds.shift() // TODO: how to fix multiple reqAnim is to-do.
+            this.execute()
+        }
     }
 
     private calcProgressT(t: number) {
@@ -465,7 +469,10 @@ class Axi {
     // ===== control ======
     public pause() {
         if (this.paused) return
-        cancelRequestAnimFrame(this.rafId)
+        this.rafIds.forEach(id => {
+            cancelRequestAnimFrame(id)
+        })
+        
         this.paused = true
         this.startTime = 0
         this.lastTime = this.curTime
@@ -491,7 +498,6 @@ class Axi {
 
     public seek(p: number) { 
         let progressT = p * this.duration
-        if (this.reversed) progressT = this.duration - progressT
         this.execAnimations(progressT)
     }
 
