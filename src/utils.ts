@@ -178,7 +178,7 @@ function getDistance(p1: SVGPoint, p2: SVGPoint) {
 }
 
 function getPolylineLength(el: SVGPolylineElement) {
-    const points = [ ...el.points ]
+    const points = [ ...el.points as any ]
     const len = points.length
     return points.reduce((l, point, i) => {
         if (i === len - 1) return l + 0
@@ -188,7 +188,7 @@ function getPolylineLength(el: SVGPolylineElement) {
 }
 
 function getPolygonLength(el: SVGPolygonElement) {
-    const points = [ ...el.points ]
+    const points = [ ...el.points as any ]
     return getPolylineLength(el) + getDistance(points[0], points[ points.length - 1 ])
 }
 
@@ -212,7 +212,7 @@ const wrongMotionPathNode = 'The motion path node can only be one of (path, circ
 export function selectMotionPathNode(el: string | SVGElement) {
     if (typeof el === 'string') {
         const nodes = document.querySelectorAll(el)
-        for (const n of nodes) {
+        for (const n of nodes as any) {
             if (isMotionPathNode(n)) {
                 return n as SVGElement
             }
