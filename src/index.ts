@@ -404,13 +404,13 @@ class Axi {
             }
 
             return {
-                start: (i === 0 ? delay : 0) + durationPiece * i,
+                start: (i === 0 ? 0 : delay) + durationPiece * i,
                 end: delay + durationPiece * (i + 1) + (i === len - 1 ? endDelay : 0),
                 duration: durationPiece,
                 value: d,
                 isPath: isPathVal(d),
                 isColor,
-                delay,
+                delay: i === 0 ? delay : 0,
                 from,
                 to
             }
@@ -443,7 +443,9 @@ class Axi {
         this.animations.forEach(item => {
             const tween = item.tweens.filter(d => progressT <= d.end)[0]
             if (!tween) return
-            const eased = item.easing(minMax(progressT - tween.delay, 0, tween.duration) / tween.duration)
+            const tweenProgressT = minMax(progressT - tween.delay - tween.start, 0, tween.duration)
+            const tweenProgress = tweenProgressT / tween.duration
+            const eased = item.easing( tweenProgress )
             let newVal
             if (tween.isColor) newVal = composeCorNewVal(tween.from.number as any, tween.to.number as any, eased)
             else if (tween.isPath) newVal = getPathProgressVal(tween.value as PathTweenVal, eased)
