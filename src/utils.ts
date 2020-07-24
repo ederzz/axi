@@ -22,7 +22,7 @@ export function updateObjectProps(o1: any, o2: any) {
     return cloneObj
 }
 
-export function minMax(a: number, b: number, c: number) {
+export function minMax(a: number, b: number, c: number) { // math.max firstly, then math.min
     return Math.min(Math.max(a, b), c)
 }
 
