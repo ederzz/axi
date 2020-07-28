@@ -1,4 +1,4 @@
-const body = document.querySelector('body')
+const body = $('body')
 
 function addNavLinks(links) {
     const {
@@ -38,13 +38,13 @@ function addNavLinks(links) {
 }
 
 function resetActiveLink(id, parentId, color) {
-    document.querySelectorAll('.link a').forEach(d => {
+    $$('.link a').forEach(d => {
         d.classList = ''
     })
 
-    const link = document.querySelector(`.sub-link a[href='#${ id }']`)
+    const link = $(`.sub-link a[href='#${ id }']`)
     link.classList = color
-    const cateLink = document.querySelector(`a[href='#${ parentId }']`)
+    const cateLink = $(`a[href='#${ parentId }']`)
     cateLink.classList = color
 }
 

@@ -17,11 +17,11 @@ addDemos(
                 translateX: 250,
                 axiStart() {
                     console.log('start a new Axi.')
-                    document.querySelector('.start-hook-status').innerHTML = 'Axi start: true'
+                    $('.start-hook-status').innerHTML = 'Axi start: true'
                 },
                 axiEnd() {
                     console.log('Axi end.')
-                    document.querySelector('.end-hook-status').innerHTML = 'Axi end: true'
+                    $('.end-hook-status').innerHTML = 'Axi end: true'
                 },
             }]
         },
@@ -39,11 +39,11 @@ addDemos(
                 translateX: 250,
                 loopStart() {
                     loopStartCount++
-                    document.querySelector('.loop-start-status').innerHTML = 'loop start: ' + loopStartCount
+                    $('.loop-start-status').innerHTML = 'loop start: ' + loopStartCount
                 },
                 loopEnd() {
                     loopEndCount++
-                    document.querySelector('.loop-end-status').innerHTML = 'loop end: ' + loopEndCount
+                    $('.loop-end-status').innerHTML = 'loop end: ' + loopEndCount
                 },
             }]
         },
@@ -58,11 +58,11 @@ addDemos(
                 translateX: 250,
                 updateStart() {
                     updateStartCount++
-                    document.querySelector('.update-start-status').innerHTML = 'update start: ' + updateStartCount
+                    $('.update-start-status').innerHTML = 'update start: ' + updateStartCount
                 },
                 updateEnd() {
                     updateEndCount++
-                    document.querySelector('.update-end-status').innerHTML = 'update end: ' + updateEndCount
+                    $('.update-end-status').innerHTML = 'update end: ' + updateEndCount
                 }
             }]
         },

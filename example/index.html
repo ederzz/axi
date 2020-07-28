@@ -34,11 +34,13 @@
     </div>
 
     <script>
-        const navSection = document.querySelector('.nav')
-        const demoSection = document.querySelector('.demo-collection')
-        const codeExpSection = document.querySelector('.code-example .content .code')
-        const category = document.querySelector('.header .category')
-        const demoTitle = document.querySelector('.header .demo-title')
+        const $ = document.querySelector.bind(document)
+        const $$ = document.querySelectorAll.bind(document)
+        const navSection = $('.nav')
+        const demoSection = $('.demo-collection')
+        const codeExpSection = $('.code-example .content .code')
+        const category = $('.header .category')
+        const demoTitle = $('.header .demo-title')
 
         let runningAxiDemo
 
@@ -71,7 +73,7 @@
     <script src="./demos/hooks.js"></script>
 
     <script>
-        document.querySelector('.demo-collection .demo').click()
+        $('.demo-collection .demo').click()
     </script>
 </body>
 </html>
