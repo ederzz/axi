@@ -17,7 +17,8 @@ import {
     color2rgba,
     rgbaGen,
     requestAnimFrame,
-    cancelRequestAnimFrame
+    cancelRequestAnimFrame,
+    isType
 } from './utils'
 
 type DurationFunc = () => number
@@ -76,6 +77,8 @@ interface ITween {
 
 interface IAnimation {
     target: HTMLElement[],
+    targetIdx: number,
+    targetLen: number,
     type: animationType,
     delay: number, 
     endDelay: number,
@@ -259,7 +262,7 @@ class Axi {
         }
     }
 
-    private registerVisibilityEvent() {
+    private registerVisibilityEvent() { // start/stop axi at visibilitychange.
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && !this.paused) {
                 this.isPausedByBrowserHidden = true
@@ -285,7 +288,7 @@ class Axi {
         target = Array.isArray(target) ? target : [ target ]
         this.targets = [].concat(
             ...target.map(d => { 
-                if (typeof d === 'string') return (Array as any).from(document.querySelectorAll(d))
+                if (isType(d, 'string')) return (Array as any).from(document.querySelectorAll(d as string))
                 return d
             })
         )
@@ -349,6 +352,8 @@ class Axi {
                     
                     return {
                         target,
+                        targetIdx: idx,
+                        targetLen: ary.length,
                         tweens,
                         type,
                         transformCache,
@@ -371,7 +376,7 @@ class Axi {
             easing: string, 
             duration: number 
         },
-        idx: number,
+        targetIdx: number,
         targetLen: number
     ) {
         const {
@@ -383,7 +388,7 @@ class Axi {
         } = opts
         const oriValue = getTargetOriValue(type, target, prop)
         const oriUnit = parseUnit(oriValue)
-        const vals = Array.isArray(value) ? value : [ value ]
+        const vals = this.parseValueOfTween( value, target, targetIdx, targetLen )
         const len = vals.length
         const durationPiece = duration / len
 
@@ -391,8 +396,8 @@ class Axi {
             const isColor = isCor(d as string)
             let fromVal = i === 0 ? oriValue : vals[ i - 1 ]
             let toVal = vals[i]
-            if (typeof fromVal === 'function') fromVal = fromVal(target, idx, targetLen)
-            if (typeof toVal === 'function') toVal = toVal(target, idx, targetLen)
+            if (typeof fromVal === 'function') fromVal = fromVal(target, targetIdx, targetLen)
+            if (typeof toVal === 'function') toVal = toVal(target, targetIdx, targetLen)
 
             let from, to
             if (isColor) {
@@ -417,6 +422,18 @@ class Axi {
         })
     }
 
+    private parseValueOfTween(val: Ivalue, target: HTMLElement, idx: number, len: number) {
+        const vals = []
+        if (Array.isArray(val)) vals.push(...val)
+        else vals.push(val)
+        return vals.map(d => {
+            if (typeof d === 'function') {
+                return d(target, idx, len)
+            }
+            return d
+        })
+    }
+
     private execute() { // 执行动画
         this.rafId = requestAnimFrame(this.animationStep.bind(this))
     }
@@ -424,7 +441,7 @@ class Axi {
     private animationStep(t: number) {
         const progressT = this.calcProgressT(t)
         this.hooks.updateStart() // hook: start of every update.
-        this.execAnimations(progressT)
+        this.runAnimations(progressT)
         this.hooks.updateEnd() // hook: end of every update.
         this.checkEnding(progressT)
         if (!this.paused) {
@@ -439,7 +456,7 @@ class Axi {
         return this.reversed ? this.duration - progressT : progressT
     }
 
-    private execAnimations(progressT: number) {
+    private runAnimations(progressT: number) {
         this.animations.forEach(item => {
             const tween = item.tweens.filter(d => progressT <= d.end)[0]
             if (!tween) return
@@ -449,7 +466,7 @@ class Axi {
             let newVal
             if (tween.isColor) newVal = composeCorNewVal(tween.from.number as any, tween.to.number as any, eased)
             else if (tween.isPath) newVal = getPathProgressVal(tween.value as PathTweenVal, eased)
-            else newVal = (tween.to.number - tween.from.number) * eased + tween.from.number
+            else newVal = this.getEasedValOfTween(tween, eased)
             if (item.round && !tween.isColor) newVal = Math.round(newVal as number)
             if (tween.to.unit) newVal = newVal + tween.to.unit
 
@@ -458,15 +475,25 @@ class Axi {
         })
     }
 
+    private getEasedValOfTween(tween: ITween, eased: number) {
+        const {
+            from: { number: from },
+            to: { number: to },
+        } = tween
+
+        return from + (to - from) * eased
+    }
+
     private checkEnding(t: number) {
         const isEnd = this.reversed ? t <= 0 : t >= this.duration
 
         if (isEnd) {
             this.hooks.loopEnd() // hook: end of loop
-            if (this.animationOpts.direction === 'alternate') {
-                this.reversed = !this.reversed
-            }
+
             if (this.restLoopCount > 0 || this.restLoopCount === -1) {
+                if (this.animationOpts.direction === 'alternate') {
+                    this.reversed = !this.reversed
+                }
                 this.newLoop()
             } else { // hook: end of axi
                 this.paused = true
@@ -507,7 +534,7 @@ class Axi {
 
     public seek(p: number) { 
         let progressT = p * this.duration
-        this.execAnimations(progressT)
+        this.runAnimations(progressT)
     }
 
     public newLoop() {
@@ -539,6 +566,12 @@ class Axi {
             svg: getSvgInfo(path),
             totalLength: getTotalLength(path)
         } as PathTweenVal)
+    }
+
+    static setPathDashArray(el: SVGAElement) { // set stroke-dasharray of svg-el, and return length of svg-el.
+        const len = getTotalLength(el)
+        el.setAttribute('stroke-dasharray', len)
+        return len
     }
 }
 

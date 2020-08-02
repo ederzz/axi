@@ -1,5 +1,5 @@
 export function parseUnit(val: string | number | object) {
-    if (typeof val === 'object') return '' // TODO:
+    if (isType(val, 'object')) return '' // TODO:
     const split = /[+-]?\d*\.?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?(%|px|pt|em|rem|in|cm|mm|ex|ch|pc|vw|vh|vmin|vmax|deg|rad|turn)?$/.exec(val + '');
     if (split) return split[1] || ''
 }
@@ -210,8 +210,8 @@ const motionPathNodeTypes = [ 'path', 'circle', 'rect', 'line', 'polyline', 'pol
 const wrongMotionPathNode = 'The motion path node can only be one of (path, circle, rect, line, polyline, polygon).'
 
 export function selectMotionPathNode(el: string | SVGElement) {
-    if (typeof el === 'string') {
-        const nodes = document.querySelectorAll(el)
+    if (isType(el, 'string')) {
+        const nodes = document.querySelectorAll(el as string)
         for (const n of nodes as any) {
             if (isMotionPathNode(n)) {
                 return n as SVGElement
@@ -219,7 +219,7 @@ export function selectMotionPathNode(el: string | SVGElement) {
         }
         throw new Error(wrongMotionPathNode)
     } else {
-        if (isMotionPathNode(el)) {
+        if (isMotionPathNode(el as SVGAElement)) {
             return el as SVGElement
         }
         throw new Error(wrongMotionPathNode)
@@ -246,3 +246,7 @@ export const cancelRequestAnimFrame = window.cancelAnimationFrame ||
     (window as any).oCancelRequestAnimationFrame ||
     (window as any).msCancelRequestAnimationFrame ||
     window.clearTimeout
+
+export function isType(v: any, t: string) {
+    return Object.prototype.toString.call(v).toLowerCase() === `[object ${ t }]`
+}
