@@ -20,18 +20,35 @@ import {
     cancelRequestAnimFrame
 } from './utils'
 
-type DurationFunc = () => number
-type IDuration = number | DurationFunc
+type NumberGenerator = (el: any, idx: number, len: number) => number
+type StrGenerator = (el: any, idx: number, len: number) => string
 
-interface AnimationOpts {
-    delay: IDelay,
-    endDelay: IDelay,
-    duration: IDuration,
-    easing: string,
+type Easing = string | StrGenerator
+type Delay = number | NumberGenerator
+type Duration = number | NumberGenerator
+type Direction = 'alternate' | 'reverse' | 'normal'
+
+interface TweenConfig {
+    delay?: Delay,
+    endDelay?: Delay,
+    duration?: Duration,
+    easing?: Easing
+}
+type TweenOriVal = number | string
+type TweenVal = TweenOriVal | TweenOriVal[]
+type TweenObj = { value: TweenVal } & TweenConfig
+type AnimationVal = TweenVal | TweenObj | TweenObj[]
+type AnimationValGenerator = (node: HTMLElement, idx: number, len: number) => TweenVal
+
+interface AnimationConfig {
+    delay: Delay,
+    endDelay: Delay,
+    duration: Duration,
+    easing: Easing,
+    direction: Direction,
     autoPlay: boolean,
+    round: boolean,
     loop: boolean,
-    direction: IDirection,
-    round: boolean
 }
 
 interface IHooks {
@@ -43,18 +60,15 @@ interface IHooks {
     updateEnd: () => void,
 }
 
-type Options = Partial<AnimationOpts> & Partial<IHooks> & {
-    target: ITarget, 
-    [animationKey: string]: any 
+type Target = string | HTMLElement | (string | HTMLElement)[]
+
+type Options = Partial<AnimationConfig> & Partial<IHooks> & {
+    target: Target
+} & {
+    [animationKey: string]: AnimationValGenerator | AnimationVal | PathTweenVal
 }
 
-type DelayFunc = (el: any, idx: number, len: number) => number
-type IDelay = number | DelayFunc
-type ITarget = string | HTMLElement | (string | HTMLElement)[]
 type animationType = 'css' | 'attribute' | 'transform' | 'object'
-type IvalueGen = (el: Element, i: number, len: number) => any
-type Ivalue = number | number[] | string | string[] | PathTweenVal | PathTweenVal[] | IvalueGen // TODO:
-type IDirection = 'alternate' | 'reverse' | 'normal'
 
 interface TweenValue {
     number: number,
@@ -66,10 +80,12 @@ interface ITween {
     start: number,
     end: number,
     delay: number,
+    endDelay: number,
     duration: number,
-    value: number | string | PathTweenVal,
+    value: AnimationVal | AnimationValGenerator | PathTweenVal,
     from: TweenValue,
     to: TweenValue,
+    easing: any,
     isPath: boolean,
     isColor: boolean
 }
@@ -77,16 +93,13 @@ interface ITween {
 interface IAnimation {
     target: HTMLElement[],
     type: animationType,
-    delay: number, 
-    endDelay: number,
     prop: string, 
-    duration: number,
     round: boolean,
-    value: Ivalue,
     transformCache: { [k: string]: any },
-    easing: (t: number) => number,
     tweens: ITween[]
 }
+
+type FunctionValArgs = [ HTMLElement, number, number ] 
 
 function getParentSvg(el: SVGElement) {
     let parent = el.parentNode
@@ -133,7 +146,7 @@ const defaultHooks = {
 
 // 是否为动画属性
 function isAnimationKey(k: string): boolean {
-    return k !== 'target' && !defaultAnimationOpts.hasOwnProperty(k) 
+    return k !== 'target' && !defaultAnimationOpts.hasOwnProperty(k) && !defaultHooks.hasOwnProperty(k)
 }
 
 function isPathVal(val: any): val is PathTweenVal  {
@@ -149,7 +162,7 @@ function parseEasing(n: string) {
     return ease.apply(null, params)
 }
 
-function decomposeValue(val: Ivalue, unit: string) {
+function decomposeValue(val: PathTweenVal | AnimationVal, unit: string) {
     const reg = /[+-]?\d*\.?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g
     const matchRet = ((isPathVal(val) ? val.totalLength : val) + '').match(reg)
 
@@ -211,13 +224,20 @@ function composeCorNewVal(from: number[], to: number[], eased: number) {
     return rgbaGen(ret[0], ret[1], ret[2], ret[3])
 }
 
+function getFunctionVal(d: any, args: FunctionValArgs) {
+    if (typeof d === 'function') {
+        return d( ...args )
+    }
+    return d ?? void 0
+}
+
 // Axi = animation + ... + animation
 // animation = tween + ... + tween
 
 class Axi { 
     private options: Options
 
-    private animationOpts: AnimationOpts
+    private animationOpts: AnimationConfig
     private hooks: IHooks // func of hooks
 
     private targets: HTMLElement[] // targets of animation
@@ -248,15 +268,21 @@ class Axi {
         this.setAnimationKeys(opts)
         this.createAnimations()
         this.registerVisibilityEvent()
-        this.duration = Math.max(...this.animations.map(d => d.duration)) 
-            + Math.max(...this.animations.map(d => d.delay)) 
-            + Math.max(...this.animations.map(d => d.endDelay))
+        this.getTotalDuration()
 
         if (this.animationOpts.autoPlay) {
             this.newLoop()
             this.execute()
             this.paused = false
         }
+    }
+
+    private getTotalDuration() {
+        this.duration = Math.max( ...this.animations.map(d => {
+            return d.tweens.reduce((t, d) => {
+                return t + d.delay + d.duration + d.endDelay
+            }, 0)
+        }))
     }
 
     private registerVisibilityEvent() {
@@ -293,7 +319,6 @@ class Axi {
 
     private setAnimationOpts(opts: Options) { // set animation options
         this.animationOpts = updateObjectProps(defaultAnimationOpts, opts)
-        if (typeof this.animationOpts.duration === 'function') this.animationOpts.duration = this.animationOpts.duration()
     }
 
     private setReversed() {
@@ -318,103 +343,138 @@ class Axi {
 
     private createAnimations() {
         const animations: IAnimation[] = [].concat(
-            ...this.targets.map((target, idx, ary) => {
-                const transformCache = isDom(target) ? getTransforms(target) : {}
-                const {
-                    delay,
-                    endDelay,
-                    easing,
-                    round
-                } = this.animationOpts
-                const curDelay = typeof delay === 'number' ? delay : delay(target, idx, ary.length)
-                const curEndDelay = typeof endDelay === 'number' ? endDelay : endDelay(target, idx, ary.length)
-
-                return this.animationKeys.map(prop => {
-                    const type = getAnimationType(target, prop)
-                    let opts = { // options of every animation.
-                        prop,
-                        easing,
-                        round,
-                        delay: curDelay,
-                        endDelay: curEndDelay,
-                        duration: this.animationOpts.duration as number,
-                        value: this.options[ prop ] /* value of tweens */
-                    }
-                    const propVal = this.options[ prop ]
-                    if (typeof propVal === 'object' && !isPathVal(propVal)) { // reset specific animation opts.exp: { value: 360, duration: 1800, easing: 'easeInOutSine' }
-                        opts = updateObjectProps(opts, propVal)
-                    }
-                    opts.easing = parseEasing(opts.easing)
-                    const tweens = this.parseTweens( target, type, opts, idx, ary.length )
-                    
-                    return {
-                        target,
-                        tweens,
-                        type,
-                        transformCache,
-                        ...opts
-                    }
-                })
-            })
+            ...this.targets.map( this.createAnimationsOfEl.bind(this) )
         )
         this.animations = animations
     }
+    
+    private createAnimationsOfEl(target: HTMLElement, idx: number, ary: HTMLElement[]) {
+        const transformCache = isDom(target) ? getTransforms(target) : {}
+        const functionValArgs: FunctionValArgs = [target, idx, ary.length]
 
-    private parseTweens(
-        target: HTMLElement, 
-        type: string, 
-        opts: { 
-            value: Ivalue, 
-            prop: string, 
-            delay: number, 
-            endDelay: number, 
-            easing: string, 
-            duration: number 
-        },
-        idx: number,
-        targetLen: number
-    ) {
         const {
-            prop,
             delay,
             endDelay,
-            value,
-            duration
-        } = opts
-        const oriValue = getTargetOriValue(type, target, prop)
-        const oriUnit = parseUnit(oriValue)
-        const vals = Array.isArray(value) ? value : [ value ]
-        const len = vals.length
-        const durationPiece = duration / len
+            easing,
+            duration,
+            round
+        } = this.animationOpts
+        const curDelay = getFunctionVal( delay, functionValArgs )
+        const curEndDelay = getFunctionVal( endDelay, functionValArgs )
+        const curEasing = getFunctionVal( easing, functionValArgs )
+        const curDuration = getFunctionVal( duration, functionValArgs )
 
-        return (vals as string[]).map((d: Ivalue, i: number) => {
-            const isColor = isCor(d as string)
-            let fromVal = i === 0 ? oriValue : vals[ i - 1 ]
-            let toVal = vals[i]
-            if (typeof fromVal === 'function') fromVal = fromVal(target, idx, targetLen)
-            if (typeof toVal === 'function') toVal = toVal(target, idx, targetLen)
+        return this.animationKeys.map(prop => {
+            const type = getAnimationType(target, prop)
+            const defaultOpts = { // default opts of tweens
+                delay: curDelay,
+                endDelay: curEndDelay,
+                duration: curDuration,
+                easing: curEasing,
+            }
+            const tweens = this.createTweensOfAnimation( defaultOpts, type, prop, functionValArgs )
+            
+            return {
+                target,
+                tweens,
+                type,
+                round,
+                prop,
+                transformCache,
+            }
+        })
+    }
+
+    private createTweensOfAnimation(
+        defaultOpts: any,
+        type: string, 
+        prop: string,
+        functionValArgs: FunctionValArgs
+    ) {
+        const vals = this.parsePropVal(prop, functionValArgs)
+
+        let oriValue = getTargetOriValue(type, functionValArgs[ 0 ], prop)
+        let oriUnit = parseUnit(oriValue)
+
+        const len = vals.length
+        const durationPiece = defaultOpts.duration / len
+
+        let prevEndTime = 0
+        let previousVal: number | string
+        return vals.map((_: any, i: number) => {
+            const current = vals[ i ]
+
+            let {
+                delay,
+                endDelay,
+                duration = durationPiece,
+                easing = defaultOpts.easing
+            } = current
+
+            const toVal = Array.isArray(current.value) ? current.value[1] : current.value
+            const fromVal = Array.isArray(current.value) ? current.value[0] : previousVal ?? oriValue
+            previousVal = toVal
+
+            if (i === 0 && delay === void 0) {
+                delay = defaultOpts.delay
+            }
+            if (i === vals.length && endDelay === void 0) {
+                endDelay = defaultOpts.endDelay
+            }
+
+            delay = delay ?? 0
+            endDelay = endDelay ?? 0
+
+            const isColor = isCor(toVal as string)
 
             let from, to
             if (isColor) {
                 from = decomposeCorValue(fromVal as string)
-                to = decomposeCorValue(d as string) 
+                to = decomposeCorValue(toVal as string) 
             } else {
                 from = decomposeValue(fromVal, parseUnit(fromVal) || oriUnit)
                 to = decomposeValue(toVal, parseUnit(toVal) || oriUnit)
             }
 
+            const start = prevEndTime
+            const end = start + delay + endDelay + duration
+            prevEndTime = end
+            const isPath = isPathVal(this.options[ prop ])
+
             return {
-                start: (i === 0 ? 0 : delay) + durationPiece * i,
-                end: delay + durationPiece * (i + 1) + (i === len - 1 ? endDelay : 0),
-                duration: durationPiece,
-                value: d,
-                isPath: isPathVal(d),
+                value: this.options[ prop ],
+                easing: parseEasing(easing),
+                start,
+                end,
+                duration,
+                isPath,
                 isColor,
-                delay: i === 0 ? delay : 0,
+                delay,
+                endDelay,
                 from,
                 to
             }
         })
+    }
+
+    private parsePropVal(prop: string, functionValArgs: FunctionValArgs) { 
+        let propVal: any = getFunctionVal( this.options[prop], functionValArgs )
+
+        if (Array.isArray(propVal)) {
+            if (propVal.length === 2 && typeof propVal[0] !== 'object') {
+                propVal = { value: propVal }
+            }
+        }
+
+        propVal = Array.isArray( propVal ) ? propVal : [ propVal ]
+
+        return propVal.map((d: TweenObj) => ({
+            ...( typeof d === 'object' ? d : { value: d } ),
+            delay: getFunctionVal(d.delay, functionValArgs),
+            endDelay: getFunctionVal(d.endDelay, functionValArgs),
+            duration: getFunctionVal(d.duration, functionValArgs),
+            easing: getFunctionVal(d.easing, functionValArgs),
+        }))
     }
 
     private execute() { // 执行动画
@@ -445,7 +505,8 @@ class Axi {
             if (!tween) return
             const tweenProgressT = minMax(progressT - tween.delay - tween.start, 0, tween.duration)
             const tweenProgress = tweenProgressT / tween.duration
-            const eased = item.easing( tweenProgress )
+            const eased = tween.easing( tweenProgress )
+
             let newVal
             if (tween.isColor) newVal = composeCorNewVal(tween.from.number as any, tween.to.number as any, eased)
             else if (tween.isPath) newVal = getPathProgressVal(tween.value as PathTweenVal, eased)
