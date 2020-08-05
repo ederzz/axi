@@ -49,7 +49,7 @@ interface AnimationConfig {
     direction: Direction,
     autoPlay: boolean,
     round: boolean,
-    loop: boolean,
+    loop: boolean | number,
 }
 
 interface IHooks {
@@ -228,7 +228,7 @@ function composeCorNewVal(from: number[], to: number[], eased: number) {
 }
 
 function getFunctionVal(d: any, args: FunctionValArgs) {
-    if (typeof d === 'function') {
+    if (isType(d, 'function')) {
         return d( ...args )
     }
     return d ?? void 0
@@ -314,7 +314,7 @@ class Axi {
         targets = Array.isArray(targets) ? targets : [ targets ]
         this.targets = [].concat(
             ...targets.map(d => { 
-                if (typeof d === 'string') return (Array as any).from(document.querySelectorAll(d))
+                if (isType(d, 'string')) return (Array as any).from(document.querySelectorAll(d as string))
                 return d
             })
         )
@@ -336,7 +336,7 @@ class Axi {
             direction,
             loop
         } = this.animationOpts
-        if (typeof loop === 'number') this.restLoopCount = loop
+        if (isType(loop, 'number')) this.restLoopCount = loop as number
         else this.restLoopCount = loop ? -1 : ( direction === 'alternate' ? 2 : 1 )
     }
     
@@ -464,7 +464,7 @@ class Axi {
         let propVal: any = getFunctionVal( this.options[prop], functionValArgs )
 
         if (Array.isArray(propVal)) {
-            if (propVal.length === 2 && typeof propVal[0] !== 'object') {
+            if (propVal.length === 2 && !isType(propVal[0], 'object')) {
                 propVal = { value: propVal }
             }
         }
@@ -472,7 +472,7 @@ class Axi {
         propVal = Array.isArray( propVal ) ? propVal : [ propVal ]
 
         return propVal.map((d: TweenObj) => ({
-            ...( typeof d === 'object' ? d : { value: d } ),
+            ...( isType(d, 'object') ? d : { value: d } ),
             delay: getFunctionVal(d.delay, functionValArgs),
             endDelay: getFunctionVal(d.endDelay, functionValArgs),
             duration: getFunctionVal(d.duration, functionValArgs),

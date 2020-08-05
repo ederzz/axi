@@ -170,6 +170,10 @@ article {
     height: 18px;
 }
 
+.line.small .ph {
+    line-height: 18px!important;
+}
+
 .strip .line .box {
     height: 2px;
     margin: 1px 0;
