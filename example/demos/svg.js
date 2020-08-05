@@ -5,7 +5,7 @@ const svgEl = `
 `
 
 const motionPathCode = `new Axi({
-    target: '.motion-path' + box,
+    targets: '.motion-path' + box,
     translateX: path('x'),
     translateY: path('y'),
     rotate: path('angle'),
@@ -37,7 +37,7 @@ addDemos(
                 const path = Axi.getMotionPath('path')
 
                 motionPathAxi = new Axi({
-                    target: '.motion-path .sprite',
+                    targets: '.motion-path .sprite',
                     translateX: path('x'),
                     translateY: path('y'),
                     rotate: path('angle'),

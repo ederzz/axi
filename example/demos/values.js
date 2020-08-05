@@ -12,7 +12,7 @@ addDemos(
             size: 'small',
             axiParams: [
                 {
-                    target: '.function-based-values .sprite',
+                    targets: '.function-based-values .sprite',
                     translateX: function(_, i) {
                         return [170, 80, 270][i]
                     },
@@ -38,7 +38,7 @@ addDemos(
             shape: 'circle',
             axiParams: [
                 {
-                    target: '.relative .sprite',
+                    targets: '.relative .sprite',
                     translateX: {
                         value: 250,
                         duration: 1000
@@ -67,7 +67,7 @@ addDemos(
             spriteCls: [ 'color-hex', 'color-rgb', 'color-hsl', 'color-rgba', 'color-hsla' ],
             axiParams: [
                 {
-                    target: '.color-hex',  
+                    targets: '.color-hex',  
                     translateX: 270,
                     background: '#FFF',
                     easing: 'easeInOutQuad',
@@ -76,7 +76,7 @@ addDemos(
                     duration: 2000,
                 },
                 {
-                    target: '.color-rgb',  
+                    targets: '.color-rgb',  
                     translateX: 270,
                     duration: 2000,
                     easing: 'easeInOutQuad',
@@ -85,7 +85,7 @@ addDemos(
                     background: 'rgb(255,255,255)'
                 },
                 {
-                    target: '.color-hsl',  
+                    targets: '.color-hsl',  
                     duration: 2000,
                     easing: 'easeInOutQuad',
                     loop: true,
@@ -97,7 +97,7 @@ addDemos(
                     duration: 2000,
                     easing: 'easeInOutQuad',
                     loop: true,
-                    target: '.color-rgba',  
+                    targets: '.color-rgba',  
                     translateX: 270,
                     direction: 'alternate',
                     background: 'rgba(255,255,255, .2)'
@@ -106,10 +106,25 @@ addDemos(
                     duration: 2000,
                     easing: 'easeInOutQuad',
                     loop: true,
-                    target: '.color-hsla',  
+                    targets: '.color-hsla',  
                     translateX: 270,
                     direction: 'alternate',
                     background: 'hsla(0, 100%, 100%, .2)'
+                },
+            ]
+        },
+        { 
+            id: 'fromTo', 
+            cls: 'from-to', 
+            title: 'FROM TO', 
+            shape: 'circle',
+            axiParams: [
+                {
+                    targets: '.from-to .sprite',
+                    translateX: [100, 250], // from 100 to 250
+                    delay: 500,
+                    direction: 'alternate',
+                    loop: true
                 },
             ]
         },

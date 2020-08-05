@@ -38,7 +38,7 @@ addDemos(
             spriteCls: easingNames,
             count: easingNames.length,
             axiParams: easingNames.map(easing => ({
-                target: '.' + easing,
+                targets: '.' + easing,
                 translateX: 250,
                 direction: 'alternate',
                 loop: true,

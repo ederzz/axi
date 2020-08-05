@@ -7,7 +7,7 @@ addDemos(
             title: 'CSS TRANSFORMS', 
             count: 1, 
             axiParams: [{
-                target: '.css-transforms .sprite',
+                targets: '.css-transforms .sprite',
                 translateX: 250,
                 scale: 2,
                 rotate: '1turn'
@@ -19,7 +19,7 @@ addDemos(
             title: 'CSS PROPERTIES', 
             count: 1, 
             axiParams: [{
-                target: '.css-properties .sprite',
+                targets: '.css-properties .sprite',
                 left: '240px',
                 backgroundColor: '#FFF',
                 borderRadius: ['50%'],

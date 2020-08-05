@@ -63,7 +63,7 @@ interface IHooks {
 type Target = string | HTMLElement | (string | HTMLElement)[]
 
 type Options = Partial<AnimationConfig> & Partial<IHooks> & {
-    target: Target
+    targets: Target
 } & {
     [animationKey: string]: AnimationValGenerator | AnimationVal | PathTweenVal
 }
@@ -146,7 +146,7 @@ const defaultHooks = {
 
 // 是否为动画属性
 function isAnimationKey(k: string): boolean {
-    return k !== 'target' && !defaultAnimationOpts.hasOwnProperty(k) && !defaultHooks.hasOwnProperty(k)
+    return k !== 'targets' && !defaultAnimationOpts.hasOwnProperty(k) && !defaultHooks.hasOwnProperty(k)
 }
 
 function isPathVal(val: any): val is PathTweenVal  {
@@ -307,10 +307,10 @@ class Axi {
     }
 
     private setAnimationEles() { // 获取更新元素
-        let { target } = this.options
-        target = Array.isArray(target) ? target : [ target ]
+        let { targets } = this.options
+        targets = Array.isArray(targets) ? targets : [ targets ]
         this.targets = [].concat(
-            ...target.map(d => { 
+            ...targets.map(d => { 
                 if (typeof d === 'string') return (Array as any).from(document.querySelectorAll(d))
                 return d
             })
