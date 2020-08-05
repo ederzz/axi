@@ -21,8 +21,8 @@ import {
     isType
 } from './utils'
 
-type NumberGenerator = (el: any, idx: number, len: number) => number
-type StrGenerator = (el: any, idx: number, len: number) => string
+type NumberGenerator = (el: HTMLElement, idx: number, len: number) => number
+type StrGenerator = (el: HTMLElement, idx: number, len: number) => string
 
 type Easing = string | StrGenerator
 type Delay = number | NumberGenerator
@@ -98,7 +98,7 @@ interface IAnimation {
     type: animationType,
     prop: string, 
     round: boolean,
-    transformCache: { [k: string]: any },
+    transformCache: { [k: string]: string | number },
     tweens: ITween[]
 }
 
@@ -222,7 +222,7 @@ function getSvgInfo(el: SVGElement) {
 function composeCorNewVal(from: number[], to: number[], eased: number) {
     let ret = []
     for (let i = 0; i < from.length; i++) {
-        ret.push((to[i] - from[i]) * eased + from[i] as any)
+        ret.push((to[i] - from[i]) * eased + from[i])
     }
     return rgbaGen(ret[0], ret[1], ret[2], ret[3])
 }
@@ -595,7 +595,6 @@ class Axi {
         this.lastTime = 0
         this.startTime = 0
         this.curTime = 0
-        // this.execute()
     }
 
     public reverse() {
