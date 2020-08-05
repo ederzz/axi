@@ -13,7 +13,7 @@ addDemos(
             count: 1, 
             extra: '<div class="start-hook-status">Axi start: false</div><div class="end-hook-status">Axi end: false</div>',
             axiParams: [{
-                target: '.axi-start-end .sprite',
+                targets: '.axi-start-end .sprite',
                 translateX: 250,
                 axiStart() {
                     console.log('start a new Axi.')
@@ -32,7 +32,7 @@ addDemos(
             count: 1, 
             extra: '<div class="loop-start-status">loop start: 0</div><div class="loop-end-status">loop end: 0</div>',
             axiParams: [{
-                target: '.loop-start-end .sprite',
+                targets: '.loop-start-end .sprite',
                 loop: true,
                 direction: 'alternate',
                 duration: 8000,
@@ -54,7 +54,7 @@ addDemos(
             count: 1, 
             extra: '<div class="update-start-status">update start: 0</div><div class="update-end-status">update end: 0</div>',
             axiParams: [{
-                target: '.update-start-end .sprite',
+                targets: '.update-start-end .sprite',
                 translateX: 250,
                 updateStart() {
                     updateStartCount++

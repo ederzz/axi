@@ -8,7 +8,7 @@ addDemos(
             linePh: [ '3000ms' ],
             count: 1,
             axiParams: [{
-                target: '.duration .sprite',
+                targets: '.duration .sprite',
                 translateX: 250,
                 duration: 3000
             }]
@@ -20,7 +20,7 @@ addDemos(
             linePh: [ '1000s' ],
             count: 1,
             axiParams: [{
-                target: '.delay .sprite',
+                targets: '.delay .sprite',
                 translateX: 250,
                 delay: 1000
             }]
@@ -32,7 +32,7 @@ addDemos(
             linePh: [ '1000s' ],
             count: 1,
             axiParams: [{
-                target: '.end-delay .sprite',
+                targets: '.end-delay .sprite',
                 translateX: 250,
                 endDelay: 1000,
                 direction: 'alternate'
@@ -44,7 +44,7 @@ addDemos(
             title: 'SPECIFIC PROPERTY PARAMETERS', 
             count: 1,
             axiParams: [{
-                target: '.spec-prop-params .sprite',
+                targets: '.spec-prop-params .sprite',
                 translateX: {
                     value: 250,
                     duration: 800
@@ -71,7 +71,7 @@ addDemos(
             count: 3,
             size: 'small',
             axiParams: [{
-                target: '.function-base-params .sprite',
+                targets: '.function-base-params .sprite',
                 translateX: 270,
                 direction: 'alternate',
                 loop: true,

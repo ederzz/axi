@@ -9,16 +9,16 @@ addDemos(
             title: 'DIRECTION', 
             count: 3,
             axiParams: [{
-                target: '.direction-normal',
+                targets: '.direction-normal',
                 translateX: 250,
                 easing: 'easeInOutSine'
             }, {
-                target: '.direction-reverse',
+                targets: '.direction-reverse',
                 translateX: 250,
                 direction: 'reverse',
                 easing: 'easeInOutSine'
             }, {
-                target: '.direction-alternate',
+                targets: '.direction-alternate',
                 translateX: 250,
                 direction: 'alternate',
                 easing: 'easeInOutSine'
@@ -33,35 +33,35 @@ addDemos(
             size: 'small',
             count: 6,
             axiParams: [{
-                target: '.loop',
+                targets: '.loop',
                 translateX: 270,
                 loop: 3,
                 easing: 'easeInOutSine'
             }, {
-                target: '.loop-infinity',
+                targets: '.loop-infinity',
                 translateX: 270,
                 loop: true,
                 easing: 'easeInOutSine'
             }, {
-                target: '.loop-reverse',
+                targets: '.loop-reverse',
                 translateX: 270,
                 loop: 3,
                 direction: 'reverse',
                 easing: 'easeInOutSine'
             }, {
-                target: '.loop-reverse-infinity',
+                targets: '.loop-reverse-infinity',
                 translateX: 270,
                 direction: 'reverse',
                 loop: true,
                 easing: 'easeInOutSine'
             }, {
-                target: '.loop-alternate',
+                targets: '.loop-alternate',
                 translateX: 270,
                 loop: 3,
                 direction: 'alternate',
                 easing: 'easeInOutSine'
             }, {
-                target: '.loop-alternate-infinity',
+                targets: '.loop-alternate-infinity',
                 translateX: 270,
                 direction: 'alternate',
                 loop: true,
@@ -76,12 +76,12 @@ addDemos(
             title: 'AUTOPLAY', 
             count: 2,
             axiParams: [{
-                target: '.autoplay-true',
+                targets: '.autoplay-true',
                 translateX: 250,
                 autoPlay: true,
                 easing: 'easeInOutSine'
             }, {
-                target: '.autoplay-false',
+                targets: '.autoplay-false',
                 translateX: 250,
                 autoPlay: false,
                 easing: 'easeInOutSine'

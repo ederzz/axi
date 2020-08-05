@@ -8,7 +8,7 @@ addDemos(
             count: 1,
             axiParams: [
                 {
-                    target: '.css-selector .sprite',
+                    targets: '.css-selector .sprite',
                     translateX: 250
                 }
             ]
@@ -21,7 +21,7 @@ addDemos(
             count: 3,
             axiParams: [
                 {
-                    target: '.nodelist .sprite',
+                    targets: '.nodelist .sprite',
                     translateX: 250
                 }
             ]
