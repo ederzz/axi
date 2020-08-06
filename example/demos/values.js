@@ -128,5 +128,27 @@ addDemos(
                 },
             ]
         },
+        { 
+            id: 'multiple-tweens', 
+            cls: 'multiple-tweens', 
+            title: 'MULTIPLE TWEENS', 
+            shape: 'circle',
+            axiParams: [
+                {
+                    targets: '.multiple-tweens .sprite',
+                    translateX: [
+                        { value: 200 },
+                        { value: 80 },
+                        { value: 150 },
+                    ],
+                    translateY: -120,
+                    opacity: 0,
+                    width: 0,
+                    height: 0,
+                    duration: 2000,
+                    easing: 'linear',
+                },
+            ]
+        },
     ]
 )
