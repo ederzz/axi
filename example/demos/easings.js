@@ -47,6 +47,18 @@ addDemos(
                 duration: 2000,
                 easing: easing
             }))
-        }
+        },
+        { 
+            id: 'cubic-bezier',
+            cls: 'cubic-bezier', 
+            title: 'CUBIC BÉZIER CURVE', 
+            axiParams: [{
+                targets: '.cubic-bezier .sprite',
+                translateX: 250,
+                direction: 'alternate',
+                loop: true,
+                easing: 'cubicBezier(.5, .05, .1, .3)'
+            }]
+        },
     ]
 )

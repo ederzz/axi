@@ -1,13 +1,14 @@
 // http://robertpenner.com/easing/
 // https://easings.net/
 import { minMax } from './utils'
+import bezierEasing from './bezierEasing'
 
 interface IEases {
     [k: string]: EasingGenerator
 }
 
 type Easing = (t: number) => number
-type EasingGenerator = (a?: number, b?: number) => Easing
+type EasingGenerator = (a?: number, b?: number, c?: number, d?: number) => Easing
 
 const c1 = 1.70158
 const c3 = c1 + 1
@@ -42,7 +43,8 @@ const eases: IEases = {
 }
 
 const easings: IEases = {
-    linear: () => (t: number) => t
+    linear: () => (t: number) => t,
+    cubicBezier: bezierEasing
 }
 
 for (const n in eases) {
