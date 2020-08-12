@@ -160,7 +160,10 @@ function parseEasing(n: string) {
     const easingName = n.split('(')[0]
     const ease = easings[ easingName ]
     const match = /\(([^)]+)\)/.exec(n)
-    const params = match ? match[1].split(',').map(parseFloat) : [];
+    const numReg = /\s+[0-9]+\s+/
+    const params = match 
+        ? match[1].split(',').map(d => numReg.test(d) ? parseFloat(d) : d.trim())
+        : [];
 
     return ease.apply(null, params)
 }

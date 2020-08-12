@@ -60,5 +60,38 @@ addDemos(
                 easing: 'cubicBezier(.5, .05, .1, .3)'
             }]
         },
+        { 
+            id: 'steps',
+            cls: 'steps', 
+            title: 'STEPS',
+            count: 3,
+            spriteCls: ['default-steps', 'start-steps', 'end-steps'],
+            axiParams: [
+                {
+                    targets: '.default-steps',
+                    translateX: 250,
+                    direction: 'alternate',
+                    loop: true,
+                    round: true,
+                    easing: 'steps(5)'
+                },
+                {
+                    targets: '.start-steps',
+                    translateX: 250,
+                    direction: 'alternate',
+                    loop: true,
+                    round: true,
+                    easing: 'steps(5, start)'
+                },
+                {
+                    targets: '.end-steps',
+                    translateX: 250,
+                    direction: 'alternate',
+                    loop: true,
+                    round: true,
+                    easing: 'steps(5, end)'
+                },
+            ]
+        },
     ]
 )

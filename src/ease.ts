@@ -3,12 +3,18 @@
 import { minMax } from './utils'
 import bezierEasing from './bezierEasing'
 
+const steps = (steps: number = 10, direction: string = 'start') => 
+    (t: number) => {
+        const round = direction === 'start' ? Math.ceil : Math.floor
+        return round((minMax(t, 0.000001, 1)) * steps) * (1 / steps)
+    }
+
 interface IEases {
     [k: string]: EasingGenerator
 }
 
 type Easing = (t: number) => number
-type EasingGenerator = (a?: number, b?: number, c?: number, d?: number) => Easing
+type EasingGenerator = (a?: number, b?: number | string, c?: number, d?: number) => Easing
 
 const c1 = 1.70158
 const c3 = c1 + 1
@@ -44,7 +50,8 @@ const eases: IEases = {
 
 const easings: IEases = {
     linear: () => (t: number) => t,
-    cubicBezier: bezierEasing
+    cubicBezier: bezierEasing,
+    steps
 }
 
 for (const n in eases) {
