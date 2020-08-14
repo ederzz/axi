@@ -93,5 +93,27 @@ addDemos(
                 },
             ]
         },
+        { 
+            id: 'custom-easing-func',
+            cls: 'custom-easing-func', 
+            title: 'CUSTOM EASING FUNCTION ',
+            count: 4,
+            size: 'small',
+            axiParams: [
+                {
+                    targets: '.custom-easing-func .sprite',
+                    translateX: 270,
+                    direction: 'alternate',
+                    loop: true,
+                    duration: 2000,
+                    easing: function(_, i, total) {
+                        if (i === 3) return 'linear'
+                        return function(t) {
+                            return Math.pow(Math.sin(t * (i + 1)), total);
+                        }
+                    }
+                }
+            ]
+        },
     ]
 )

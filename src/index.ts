@@ -156,7 +156,8 @@ function isPathVal(val: any): val is PathTweenVal  {
     return isObj(val) && val.hasOwnProperty('totalLength')
 }
 
-function parseEasing(n: string) {
+function parseEasing(n: any) {
+    if (isType(n, 'function')) return n
     const easingName = n.split('(')[0]
     const ease = easings[ easingName ]
     const match = /\(([^)]+)\)/.exec(n)
