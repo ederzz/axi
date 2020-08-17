@@ -468,6 +468,7 @@ class Axi {
         let propVal: any = getFunctionVal( this.options[prop], functionValArgs )
 
         if (Array.isArray(propVal)) {
+            propVal = propVal.map(d => getFunctionVal(d, functionValArgs))
             if (propVal.length === 2 && !isType(propVal[0], 'object')) {
                 propVal = { value: propVal }
             }

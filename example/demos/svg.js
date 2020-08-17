@@ -61,7 +61,7 @@ addDemos(
             extra: svgEl2, 
             axiParams: [
                 {
-                    targets: '.line-draw',
+                    targets: '.line-draw path',
                     strokeDashoffset: [ Axi.setPathDashArray, 0 ],
                     easing: 'easeInOutSine',
                     duration: 1500,
